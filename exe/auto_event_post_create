@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+
+if ARGV.length != 5
+  STDERR.puts "Need five arguments (uuid, name, from-date, to-date, content)"
+  exit 1
+end
+
+uuid, name, from_date, to_date, content = ARGV
+
+WPEvent::Post.create uuid, name, from_date..to_date, content

@@ -9,7 +9,7 @@ require 'rubypress'
 
 module WPEvent
   def self.load_conf
-    @config = OpenStruct.new YAML.load_file 'auto_event_post.conf'
+    @config = OpenStruct.new YAML.load_file 'wp_event.conf'
   end
 
   def self.config
