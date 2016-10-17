@@ -1,6 +1,6 @@
 require "wp_event/version"
 
-require "wp_event/event"
+require "wp_event/post"
 require "wp_event/couch_event"
 
 require 'ostruct'
