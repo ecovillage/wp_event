@@ -25,6 +25,10 @@ option_parser = OptionParser.new do |opts|
   opts.separator "Will exit with 0 on success"
 end
 
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+WPEvent.logger.debug "Starting event category sync (#{WPEvent::VERSION})"
+
 # Process options
 option_parser.parse!
 
@@ -46,10 +50,9 @@ categories = JSON.parse File.read(ARGV[0])
 categories.each do |category|
   wp_category = WPEvent::Category.uuid_in_wordpress? category["uuid"]
   if wp_category
-    puts "category with uuid found"
-    puts wp_category
+    WPEvent.logger.info "category with uuid #{category['uuid']} found"
   else
-    puts "category not found, creating"
+    WPEvent.logger.info "category with uuid #{category['uuid']} not found, creating"
     wp_category = WPEvent::Category.create category["uuid"],
                                            category["name"],
                                            category["description"]

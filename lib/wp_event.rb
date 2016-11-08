@@ -33,6 +33,10 @@ module WPEvent
     posts.find &custom_uuid_field_value
   end
 
+  def self.logger
+    @logger ||= Logger.new(STDOUT)
+  end
+
   def self.find_all_posts
     wp.getPosts(blog_id: 0, filter: {post_type: Post::TYPE})
   end
