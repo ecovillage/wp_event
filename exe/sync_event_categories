@@ -7,7 +7,7 @@ require 'json'
 options = {}
 
 option_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options] FILE"
   opts.separator "sync a list of event categories with event categories registered in wordpress instance"
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
@@ -21,10 +21,24 @@ option_parser = OptionParser.new do |opts|
     puts WPEvent::VERSION
     exit
   end
+  opts.separator "FILE is supposed to be a json hash (uuid: [name:, description:])"
   opts.separator "Will exit with 0 on success"
 end
 
 # Process options
 option_parser.parse!
+
+if ARGV.length != 0
+  STDERR.puts "Please provide json input file."
+  puts option_parser
+  exit 1
+end
+
+begin
+  WPEvent.load_conf
+rescue Errno::ENOENT
+  STDERR.puts "Config file (wp_event.conf) not found."
+  exit 3
+end
 
 exit 0
