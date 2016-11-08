@@ -45,6 +45,23 @@ Call with `wp_event --help` for information about the options.
 Execute as `wp_event_category` (or `bundle exec exe/wp_event_category` in development setup).
 Call with `wp_event --help` for information about the options.
 
+### sync_event_categories
+
+Consumes a JSON file with event categories like this
+
+    [
+      {
+        "uuid": "1234-1234-abcd-defa",
+        "name": "numbers",
+        "description": "Numeric events"
+      },
+      {
+        "uuid": "dead-beef-abcd-defa",
+        "name": "nutrition",
+        "description": "Events dealing with nondestructive nutrition"
+      }
+    ]
+
 ## Wordpress setup
 
 Use the `e7l-events` wordpress plugin.
