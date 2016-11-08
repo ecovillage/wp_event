@@ -8,7 +8,7 @@ require 'date'
 options = {}
 
 option_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: #{$PROGRAMNAME} [options]"
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
   end
