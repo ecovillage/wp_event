@@ -28,7 +28,7 @@ end
 # Process options
 option_parser.parse!
 
-if ARGV.length != 0
+if ARGV.length != 1
   STDERR.puts "Please provide json input file."
   puts option_parser
   exit 1
