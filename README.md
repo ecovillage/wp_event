@@ -22,6 +22,15 @@ Or install it yourself as:
 
 wp_event ships with a couple of tools
 
+### wp_event.config
+
+Tools rely on `wp_event.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory:
+
+    # wp_event.conf
+    host: "wp_event.mydomain"
+    username: "admin"
+    password: "buzzword"
+
 ### wp_event
 
 ## Wordpress setup
