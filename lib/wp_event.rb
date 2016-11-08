@@ -1,5 +1,6 @@
 require "wp_event/version"
 
+require "wp_event/category"
 require "wp_event/post"
 require "wp_event/couch_event"
 
