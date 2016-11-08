@@ -59,7 +59,7 @@ end
 
 if options[:id] && options[:uuid]
   STDERR.puts "Cannot handle both id and uuid, please specify only one of these options."
-  puts opts
+  puts option_parser
   exit 2
 end
 
