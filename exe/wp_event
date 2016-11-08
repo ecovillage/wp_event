@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+require 'date'
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAMNAME} [options]"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on("-u", "--uuid UUID", "Events UUID") do |u|
+    options[:uuid] = u
+  end
+  opts.on("-f", "--from DATE", "Events starting date") do |f|
+    options[:from] = f
+  end
+  opts.on("-t", "--to DATE", "Events ending date") do |t|
+    options[:to] = t
+  end
+  opts.on("-i", "--id WPID", "Post ID (WP)") do |i|
+    options[:id] = i
+  end
+  opts.on("--image-file PATH", "Path to image file") do |i|
+    options[:image_file] = i
+  end
+  opts.on("-n", "--name NAME", "Name ('title') of the event") do |n|
+    options[:name] = n
+  end
+  opts.on("-d", "--description DESCRIPTION", "Description of the event") do |d|
+    options[:description] = d
+  end
+  opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
+    options[:export] = x
+  end
+  opts.separator "Common options"
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+
+if !options[:id] && !options[:uuid]
+  STDERR.puts "Please provide at least the events (uu)id."
+  puts option_parser
+  exit 1
+end
+
+if options[:id] && options[:uuid]
+  STDERR.puts "Cannot handle both id and uuid, please specify only one of these options."
+  puts opts
+  exit 2
+end
+
+
+def upload_image file_path, post_id=nil
+  data = { name: file_path,
+           type: MIME::Types.type_for(file_path).first.to_s,
+           bits: XMLRPC::Base64.new(IO.read file_path),
+         }
+  # post_thumbnail { attachment_id } ...
+  data[post_id] = post_id if post_id
+  upload = WPEvent::wp.uploadFile(data: data)
+  puts "image uploaded"
+  id = upload["attachment_id"]
+end
+
+# Check existence
+if options[:uuid]
+  event = WPEvent::Post.uuid_in_wordpress? options[:uuid]
+  if options[:export]
+    STDOUT.puts JSON.pretty_generate(event)
+    exit 0
+  end
+
+  attachment_id = nil
+  if file_path = options[:image_file]
+    attachment_id = upload_image file_path
+  end
+
+  # Export, Update or Create?
+  if !event
+    event = WPEvent::Post.create options[:uuid],
+                                  options[:name],
+                                  # datetime ?
+                                  Date.parse(options[:from])..Date.parse(options[:to]),
+                                  options[:description]
+    # categories, attachment ...
+
+    puts "created"
+    post_id = event
+  else
+    post_id = event["post_id"]
+  end
+else
+  event = WPEvent::Event.by_post_id options[:id]
+  if options[:export]
+    STDOUT.puts JSON.pretty_generate(event)
+    exit 0
+  else
+    STDERR.puts "Cannot deal with updates only atm"
+    exit 3
+  end
+end
+
+exit 0
+

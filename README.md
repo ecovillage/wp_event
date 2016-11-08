@@ -33,6 +33,9 @@ Tools rely on `wp_event.conf` being present in your current working directory.  
 
 ### wp_event
 
+Execute as `wp_event` (or `bundle exec exe/wp_event` in development setup).
+Call with `wp_event --help` for information about the options.
+
 ## Wordpress setup
 
 Use the `e7l-events` wordpress plugin.
