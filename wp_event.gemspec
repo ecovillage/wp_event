@@ -9,17 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Felix Wolfsteller"]
   spec.email         = ["felix.wolfsteller@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
-
-  # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
-  # delete this section to allow pushing this gem to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
-  end
+  spec.summary       = %q{Populate a wordpress installation that has ev7l-events plugin installed with data}
+  spec.description   = %q{Companion to add event, referee and event-categories data to a wordpress installation}
+  spec.homepage      = "https://github.com/ecovillage/wp_event"
 
   spec.required_ruby_version = '>= 2.3.0'
 
