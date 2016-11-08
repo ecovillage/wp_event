@@ -8,13 +8,11 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
-    options[:verbose] = v
-  end
+  opts.separator "The standard: Create or update with ..."
   opts.on("-u", "--uuid UUID", "Events categories UUID") do |u|
     options[:uuid] = u
   end
-  opts.on("-i", "--id WPID", "Post ID (WP)") do |i|
+  opts.on("-i", "--id WPID", "(Events category) Post ID (WP)") do |i|
     options[:id] = i
   end
   opts.on("--image-file PATH", "Path to image file") do |i|
@@ -26,10 +24,17 @@ option_parser = OptionParser.new do |opts|
   opts.on("-d", "--description DESCRIPTION", "Description of the category") do |d|
     options[:description] = d
   end
+  opts.separator "Other actions (than create or update)"
+  opts.on("-l", "--list", "List categories") do |l|
+    options[:list] = l
+  end
   opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
     options[:export] = x
   end
   opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
   opts.on_tail("-h", "--help", "Show this message and exit") do
     puts opts
     exit
@@ -38,20 +43,27 @@ option_parser = OptionParser.new do |opts|
     puts WPEvent::VERSION
     exit
   end
+  opts.separator "Will exit with 0 on success"
 end
 
 # Process options
 option_parser.parse!
 
 
-if !options[:id] && !options[:uuid]
-  STDERR.puts "Please provide at least the categories (uu)id."
+if !options[:id] && !options[:uuid] && !options[:list]
+  STDERR.puts "Please provide at least the categories (uu)id or specify an action."
   puts option_parser
   exit 1
 end
 
 if options[:id] && options[:uuid]
   STDERR.puts "Cannot handle both id and uuid, please specify only one of these options."
+  puts opts
+  exit 2
+end
+
+if (options[:id] || options[:uuid]) && options[:list]
+  STDERR.puts "Cannot both list and create/update."
   puts opts
   exit 2
 end
@@ -76,6 +88,13 @@ def upload_image file_path, post_id=nil
   id = upload["attachment_id"]
 end
 
+# Actions
+if options[:list]
+  puts WPEvent::Category.fetch_name_pid_map.to_yaml
+  exit 0
+end
+
+# Default: Create/Update
 # Check existence
 if options[:uuid]
   category = WPEvent::Category.uuid_in_wordpress? options[:uuid]
@@ -107,7 +126,7 @@ else
     exit 0
   else
     STDERR.puts "Cannot deal with updates only atm"
-    exit 2
+    exit 4
   end
 end
 
