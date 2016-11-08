@@ -1,3 +1,6 @@
+require 'date'
+require 'time'
+
 module WPEvent
   module Post
 
@@ -11,11 +14,15 @@ module WPEvent
     #   - bookers info
     #   - categories
 
-    TYPE = 'event-7l'
+    TYPE = 'ev7l-event'
+
+    def self.uuid_in_wordpress? uuid
+      in_wordpress? uuid
+    end
 
     def self.in_wordpress? uuid
       all_posts = WPEvent::wp.getPosts blog_id: 0,
-                                             filter: { post_type: TYPE }
+                                       filter: { post_type: TYPE }
       # TODO extract lambda
       all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
