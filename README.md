@@ -91,7 +91,7 @@ For Sieben Linden legacy data, export of it is shipped within this gem (with mos
 
 ## Wordpress setup
 
-Use the `e7l-events` wordpress plugin.
+Use the [ev7l-events](https://github.com/ecovillage/ev7l-events) wordpress plugin.
 
 metakeys starting with "_" are by default hidden!
 
