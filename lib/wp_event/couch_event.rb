@@ -1,5 +1,3 @@
-require 'open-uri'
-require 'rest-client'
 require 'json'
 
 module WPEvent
@@ -16,9 +14,8 @@ module WPEvent
     end
 
     def self.pull_from_couchdb uuid
-      base_url = "http://localhost:5984/fk_seminar/"
       begin
-        response = JSON.parse RestClient.get(base_url + uuid)
+        response = CouchDB.get_doc uuid
         return nil if !response["g_value"]["publish_web"]
         WPEvent::CouchEvent.new response["_id"],
           response["g_value"]["title"],
