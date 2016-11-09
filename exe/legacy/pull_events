@@ -72,7 +72,8 @@ end
 if options[:from] && options[:to]
   # Range given
   events = WPEvent::CouchImport::CouchEvent.pull_from_couchdb_between options[:from], options[:to]
-  puts "events #{events}"
+  File.open(options[:outfile], 'w') << events.to_json
+  debug "Output: #{events.to_json}"
 elsif options[:uuid]
   # uuid given
   event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
