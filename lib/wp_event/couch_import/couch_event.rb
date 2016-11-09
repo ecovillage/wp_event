@@ -49,11 +49,11 @@ module WPEvent
       end
 
       def to_json *a
-        { uuid: @uuid,
-          title: @title,
+        { uuid:        @uuid,
+          title:       @title,
           description: @description,
-          fromdate: @from,
-          todate:  @to
+          fromdate:    @from,
+          todate:      @to
         }.to_json(*a)
       end
     end
