@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+
+extend WPEvent::Logging
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options] FILE
+
+    Sync a list of events with events registered in wordpress instance.
+
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:)
+    Will exit with 0 on success
+
+  USAGE
+
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+debug "Starting event sync (#{WPEvent::VERSION})"
+
+# Process options
+option_parser.parse!
+
+if ARGV.length != 1
+  STDERR.puts "Please provide json input file."
+  puts option_parser
+  exit 1
+end
+
+begin
+  WPEvent.load_conf
+rescue Errno::ENOENT
+  STDERR.puts "Config file (wp_event.conf) not found."
+  exit 3
+end
+
+events = JSON.parse File.read(ARGV[0])
+
+events.each do |event|
+  wp_event = WPEvent::Post.uuid_in_wordpress? event["uuid"]
+  if wp_event
+    info "event with uuid #{event['uuid']} found"
+  else
+    info "event with uuid #{event['uuid']} not found, creating"
+    puts event
+    wp_event = WPEvent::Post.create event["uuid"],
+                                    event["name"],
+                                    DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
+                                    event["description"]
+    puts wp_event
+  end
+end
+
+exit 0
