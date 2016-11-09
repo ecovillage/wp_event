@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Populate a wordpress installation that has ev7l-events plugin installed with data}
   spec.description   = %q{Companion to add event, referee and event-categories data to a wordpress installation}
   spec.homepage      = "https://github.com/ecovillage/wp_event"
+  spec.licenses      = ['GPL-3.0+']
 
   spec.required_ruby_version = '>= 2.3.0'
 
