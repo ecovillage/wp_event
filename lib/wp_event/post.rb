@@ -20,11 +20,14 @@ module WPEvent
       in_wordpress? uuid
     end
 
+    def self.get_all_posts
+      WPEvent::wp.getPosts blog_id: 0,
+                           filter: { post_type: TYPE , number: 100_000 }
+    end
+
     def self.in_wordpress? uuid
-      all_posts = WPEvent::wp.getPosts blog_id: 0,
-                                       filter: { post_type: TYPE }
       # TODO extract lambda
-      all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
+      get_all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
 
     def self.create uuid, name, date_range, text, category_names=[]

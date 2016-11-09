@@ -17,7 +17,7 @@ module WPEvent
 
     def self.uuid_in_wordpress? uuid
       all_posts = WPEvent::wp.getPosts blog_id: 0,
-                                       filter: { post_type: TYPE }
+                                       filter: { post_type: TYPE, number: 100_000 }
       # TODO extract lambda
       all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
