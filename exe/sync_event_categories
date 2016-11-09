@@ -7,8 +7,15 @@ require 'json'
 options = {}
 
 option_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: #{$PROGRAM_NAME} [options] FILE"
-  opts.separator "sync a list of event categories with event categories registered in wordpress instance"
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options] FILE
+
+    Sync a list of event categories with event categories registered in wordpress instance
+
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:)
+    Will exit with 0 on success
+
+  USAGE
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -21,8 +28,6 @@ option_parser = OptionParser.new do |opts|
     puts WPEvent::VERSION
     exit
   end
-  opts.separator "FILE is supposed to be a json hash (uuid: [name:, description:])"
-  opts.separator "Will exit with 0 on success"
 end
 
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO

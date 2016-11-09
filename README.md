@@ -62,6 +62,27 @@ Consumes a JSON file with event categories like this
       }
     ]
 
+### sync_events
+
+Consumes a JSON file with event categories like this
+
+    [
+      {
+        "uuid": "1a3b-1234-abcd-defa",
+        "name": "Counting for accountants",
+        "description": "advanced calculator needed",
+        "fromdate": "2016-11-11 11:00",
+        "todate": "2016-11-13 13:00"
+      },
+      {
+        "uuid": "a123-a234-abcd-def1",
+        "name": "Counting for accountants II",
+        "description": "advanced calculator needed",
+        "fromdate": "2016-12-11 11:00",
+        "todate": "2016-12-13 13:00"
+      }
+    ]
+
 ## Wordpress setup
 
 Use the `e7l-events` wordpress plugin.
