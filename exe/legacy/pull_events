@@ -59,13 +59,35 @@ if File.exist?(options[:outfile])
   exit 3
 end
 
-event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
-if event.nil?
-  info "event with uuid #{options[:uuid]} not found"
+if options[:from] && options[:to] && options[:uuid]
+  STDERR.puts "Cannot specify --from, --to AND --uuid, aborting."
+  exit 2
+end
+
+if !!options[:from] != !!options[:to]
+  STDERR.puts "Have to specify --from when --to is specified (and vice versa)."
+  exit 2
+end
+
+if options[:from] && options[:to]
+  # Range given
+  events = WPEvent::CouchImport::CouchEvent.pull_from_couchdb_between options[:from], options[:to]
+  puts "events #{events}"
+elsif options[:uuid]
+  # uuid given
+  event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
+  if event.nil?
+    info "event with uuid #{options[:uuid]} not found"
+  else
+    info "event with uuid #{options[:uuid]} found"
+    debug "Original document: #{event.document}"
+    File.open(options[:outfile], 'w') << [event].to_json
+    debug "Output: #{[event].to_json}"
+  end
 else
-  info "event with uuid #{options[:uuid]} found"
-  debug "Original document: #{event.document}"
-  File.open(options[:outfile], 'w') << [event].to_json
+  # default
+  STDERR.puts "default nyi"
+  exit 5
 end
 
 exit 0
