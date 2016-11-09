@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+
+extend WPEvent::Logging
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options]
+
+    Write json file with event information.
+  USAGE
+
+  opts.separator "Filtering options"
+  opts.on("-f", "--from DATE", "Events starting date") do |f|
+    options[:from] = f
+  end
+  opts.on("-t", "--to DATE", "Events ending date") do |t|
+    options[:to] = t
+  end
+  opts.on("-u", "--uuid UUID", "Events UUID") do |u|
+    options[:uuid] = u
+  end
+  opts.separator "Output options"
+  opts.on("-o", "--outfile FILE", "File to write data (json) to") do |o|
+    options[:outfile] = o
+  end
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+if !options[:outfile]
+  STDERR.puts "Need to specify --outfile"
+  puts option_parser
+  exit 2
+end
+
+if File.exist?(options[:outfile])
+  STDERR.puts "Outfile #{options[:outfile]} exists, aborting."
+  exit 3
+end
+
+event = WPEvent::CouchEvent.pull_from_couchdb options[:uuid]
+if event.nil?
+  info "event with uuid #{options[:uuid]} not found"
+else
+  info "event with uuid #{options[:uuid]} found"
+  debug "Original document: #{event.document}"
+  File.open(options[:outfile], 'w') << [event].to_json
+end
+
+exit 0

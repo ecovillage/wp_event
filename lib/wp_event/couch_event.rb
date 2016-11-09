@@ -1,16 +1,18 @@
 require 'open-uri'
 require 'rest-client'
+require 'json'
 
 module WPEvent
   class CouchEvent
-    attr_accessor :title, :description, :from, :to, :categories, :uuid
-    def initialize uuid, title, description, from, to, categories
+    attr_accessor :title, :description, :from, :to, :categories, :uuid, :document
+    def initialize uuid, title, description, from, to, categories, document=nil
       @uuid        = uuid
       @title       = title
       @description = description
       @from        = from
       @to          = to
       @categories  = categories
+      @document    = document
     end
 
     def self.pull_from_couchdb uuid
@@ -21,12 +23,22 @@ module WPEvent
         WPEvent::CouchEvent.new response["_id"],
           response["g_value"]["title"],
           response["g_value"]["description_long"],
-          response["g_value"]["from"],
-          response["g_value"]["to"],
-          response["g_value"]["categories"]
+          Date.strptime(response["g_value"]["date_from"], "%d.%m.%Y"),
+          Date.strptime(response["g_value"]["date_to"],   "%d.%m.%Y"),
+          response["g_value"]["categories"],
+          response
       rescue Exception => e
         nil
       end
+    end
+
+    def to_json *a
+      { uuid: @uuid,
+        title: @title,
+        description: @description,
+        fromdate: @from,
+        todate:  @to
+      }.to_json(*a)
     end
   end
 end
