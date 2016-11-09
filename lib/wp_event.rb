@@ -2,8 +2,8 @@ require "wp_event/version"
 
 require "wp_event/category"
 require "wp_event/post"
-require "wp_event/couch_event"
-require "wp_event/couch_db"
+require "wp_event/couch_import/couch_event"
+require "wp_event/couch_import/couch_db"
 require "wp_event/logging"
 
 require 'ostruct'
@@ -19,7 +19,6 @@ module WPEvent
     @config ||= load_conf
   end
 
-  # Your code goes here...
   #  wp.getPosts(blog_id: 0, filter: {post_type: 'event'})
   # .collect{|| .. "custom_fields" ... ["key"] == "uuid" ...
   # #f12ab-ab21f

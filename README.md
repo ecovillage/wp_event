@@ -83,6 +83,12 @@ Consumes a JSON file with event categories like this
       }
     ]
 
+### Import data from legacy database
+
+As long as you can export your data from the legacy database into json format (as given above), you'll be fine.  If you have problems in doing so, feel free to contact us.
+
+For Sieben Linden legacy data, export of it is shipped within this gem (with most code residing in `lib/wp_event/couch_import` and `exe/legacy`).
+
 ## Wordpress setup
 
 Use the `e7l-events` wordpress plugin.

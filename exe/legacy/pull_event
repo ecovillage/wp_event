@@ -59,7 +59,7 @@ if File.exist?(options[:outfile])
   exit 3
 end
 
-event = WPEvent::CouchEvent.pull_from_couchdb options[:uuid]
+event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
 if event.nil?
   info "event with uuid #{options[:uuid]} not found"
 else
