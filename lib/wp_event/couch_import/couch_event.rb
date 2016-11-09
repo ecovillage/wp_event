@@ -50,7 +50,7 @@ module WPEvent
 
       def to_json *a
         { uuid:        @uuid,
-          title:       @title,
+          name:        @title,
           description: @description,
           fromdate:    @from,
           todate:      @to
