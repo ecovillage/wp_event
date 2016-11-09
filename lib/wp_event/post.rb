@@ -20,6 +20,11 @@ module WPEvent
       in_wordpress? uuid
     end
 
+    def self.by_post_id post_id
+      WPEvent::wp.getPost blog_id: 0,
+                          post_id: post_id
+    end
+
     def self.get_all_posts
       WPEvent::wp.getPosts blog_id: 0,
                            filter: { post_type: TYPE , number: 100_000 }
@@ -47,7 +52,11 @@ module WPEvent
 
       #puts content.to_yaml
       WPEvent::wp.newPost(blog_id: 0,
-                                content: content)
+                          content: content)
+    end
+
+    def self.fetch_name_pid_map
+      get_all_posts.map {|p| [p["post_title"], p["post_id"]]}.to_h
     end
   end
 end

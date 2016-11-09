@@ -89,7 +89,8 @@ end
 
 if options[:list]
   # uuid, name
-  puts WPEvent::Post.get_all_posts
+  puts WPEvent::Post.fetch_name_pid_map.to_yaml
+  exit 0
 end
 
 # Check existence

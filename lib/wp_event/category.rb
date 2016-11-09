@@ -15,11 +15,14 @@ module WPEvent
                           post_id: post_id
     end
 
+    def self.get_all_posts
+      WPEvent::wp.getPosts blog_id: 0,
+                           filter: { post_type: TYPE, number: 100_000 }
+    end
+
     def self.uuid_in_wordpress? uuid
-      all_posts = WPEvent::wp.getPosts blog_id: 0,
-                                       filter: { post_type: TYPE, number: 100_000 }
       # TODO extract lambda
-      all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
+      get_all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
 
     def self.create uuid, name, text, attachment_id=nil
@@ -47,9 +50,7 @@ module WPEvent
     end
 
     def self.fetch_name_pid_map
-      all_posts = WPEvent::wp.getPosts blog_id: 0,
-                                       filter: { post_type: TYPE }
-      all_posts.map {|p| [p["post_title"], p["post_id"]]}.to_h
+      get_all_posts.map {|p| [p["post_title"], p["post_id"]]}.to_h
     end
 
     def self.add_event event_pid, event_category_pid
