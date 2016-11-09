@@ -9,9 +9,7 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
-    options[:verbose] = v
-  end
+  opts.separator "The standard: Create or update with ..."
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
   end
@@ -33,10 +31,17 @@ option_parser = OptionParser.new do |opts|
   opts.on("-d", "--description DESCRIPTION", "Description of the event") do |d|
     options[:description] = d
   end
+  opts.separator "Other actions (than create or update)"
+  opts.on("-l", "--list", "List categories") do |l|
+    options[:list] = l
+  end
   opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
     options[:export] = x
   end
   opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
   opts.on_tail("-h", "--help", "Show this message and exit") do
     puts opts
     exit
@@ -51,8 +56,8 @@ end
 option_parser.parse!
 
 
-if !options[:id] && !options[:uuid]
-  STDERR.puts "Please provide at least the events (uu)id."
+if !options[:id] && !options[:uuid] && !options[:list]
+  STDERR.puts "Please provide at least the events (uu)id or specify the list action."
   puts option_parser
   exit 1
 end
@@ -80,6 +85,11 @@ def upload_image file_path, post_id=nil
   upload = WPEvent::wp.uploadFile(data: data)
   puts "image uploaded"
   id = upload["attachment_id"]
+end
+
+if options[:list]
+  # uuid, name
+  puts WPEvent::Post.get_all_posts
 end
 
 # Check existence
@@ -110,7 +120,7 @@ if options[:uuid]
     post_id = event["post_id"]
   end
 else
-  event = WPEvent::Event.by_post_id options[:id]
+  event = WPEvent::Post.by_post_id options[:id]
   if options[:export]
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
