@@ -35,19 +35,20 @@ module WPEvent
       get_all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
 
-    def self.create uuid, name, date_range, text, category_names=[]
+    def self.create uuid, name, date_range, text, category_ids=[]
+      category_hashes = category_ids.map{|c| {key: 'event_categories', value: c}}
       content = { post_type: TYPE,
                   post_status: "publish",
                   post_data: Time.now,
                   post_content: text,
                   post_title: name,
-                  # ids here?
-                  #'terms_names' => array('category' => $cats, 'post_tag' => $ts )
-                  # tags_input = ["name1", "name2" ... also valid?
-                  terms_names: {'category' => ['Seminar'] + category_names, 'language' => ['Deutsch']},
-                  # -> terms_names : {category: ['event'], post_tag:  ...
-                  # might also be terms_names: {taxonomy_name: ["value-in-taxonomy"] ...
-                  custom_fields: [{ key: "uuid", value: uuid}],
+                  # tags_input ...
+                  terms_names: {'language' => ['Deutsch']},
+                  custom_fields: [
+                      { key: "uuid",     value: uuid },
+                      { key: "fromdate", value: date_range.first.to_time.to_i },
+                      { key: "todate",   value: date_range.last.to_time.to_i }
+                    ] | category_hashes,
                   post_author: 1 }
 
       #puts content.to_yaml
