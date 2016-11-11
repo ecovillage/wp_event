@@ -45,7 +45,7 @@ Call with `wp_event --help` for information about the options.
 Execute as `wp_category` (or `bundle exec exe/wp_category` in development setup).
 Call with `wp_event --help` for information about the options.
 
-### sync_event_categories
+### sync_categories
 
 Consumes a JSON file with event categories like this
 
