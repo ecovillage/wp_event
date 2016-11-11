@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+
+extend WPEvent::Logging
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options]
+
+    Write json file with event category information.
+
+  USAGE
+
+  opts.separator "Filtering options"
+  opts.on("-u", "--uuid UUID", "Event Categories UUID") do |u|
+    options[:uuid] = u
+  end
+  opts.separator "Output options"
+  opts.on("-o", "--outfile FILE", "File to write data (json) to") do |o|
+    options[:outfile] = o
+  end
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+if !options[:outfile]
+  STDERR.puts "Need to specify --outfile"
+  puts
+  puts option_parser
+  exit 2
+end
+
+if File.exist?(options[:outfile])
+  STDERR.puts "Outfile #{options[:outfile]} exists, aborting."
+  exit 3
+end
+
+if options[:uuid]
+  # uuid given
+  category = WPEvent::CouchImport::CouchEventCategory.pull_from_couchdb options[:uuid]
+  if category.nil?
+    warn "event category with uuid #{options[:uuid]} not found"
+    exit 5
+  else
+    info "event category with uuid #{options[:uuid]} found"
+    debug "Output: #{[category].to_json}"
+    debug "Original document: #{category.document}"
+    File.open(options[:outfile], 'w') << [category].to_json
+  end
+else
+  # default, pull all
+  categories = WPEvent::CouchImport::CouchImporter.get_all_categories
+  if categories.nil? || categories.empty?
+    error "No event categories found!"
+    exit 5
+  else
+    info "#{categories.length} categories found."
+    File.open(options[:outfile], 'w') << categories.to_json
+    debug "Output: #{categories.to_json}"
+  end
+end
+
+exit 0
