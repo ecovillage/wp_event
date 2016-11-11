@@ -90,14 +90,14 @@ end
 
 # Actions
 if options[:list]
-  puts WPEvent::Category.fetch_name_pid_map.to_yaml
+  puts WPEvent::CategoryPost.fetch_name_pid_map.to_yaml
   exit 0
 end
 
 # Default: Create/Update
 # Check existence
 if options[:uuid]
-  category = WPEvent::Category.uuid_in_wordpress? options[:uuid]
+  category = WPEvent::CategoryPost.uuid_in_wordpress? options[:uuid]
   if options[:export]
     STDOUT.puts JSON.pretty_generate(category)
     exit 0
@@ -110,7 +110,7 @@ if options[:uuid]
 
   # Export, Update or Create?
   if !category
-    category = WPEvent::Category.create options[:uuid],
+    category = WPEvent::CategoryPost.create options[:uuid],
                                         options[:name],
                                         options[:description],
                                         attachment_id
@@ -120,7 +120,7 @@ if options[:uuid]
     post_id = category["post_id"]
   end
 else
-  category = WPEvent::Category.by_post_id options[:id]
+  category = WPEvent::CategoryPost.by_post_id options[:id]
   if options[:export]
     STDOUT.puts JSON.pretty_generate(category)
     exit 0

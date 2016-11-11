@@ -1,7 +1,7 @@
 require "wp_event/version"
 
-require "wp_event/category"
-require "wp_event/event"
+require "wp_event/category_post"
+require "wp_event/event_post"
 require "wp_event/couch_import/couch_event"
 require "wp_event/couch_import/couch_db"
 require "wp_event/logging"

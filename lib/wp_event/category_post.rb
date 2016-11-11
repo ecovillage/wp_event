@@ -1,5 +1,5 @@
 module WPEvent
-  module Category
+  module CategoryPost
 
     # An category has the following information:
     #   - description (in post_content)

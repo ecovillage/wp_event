@@ -56,13 +56,13 @@ end
 events = JSON.parse File.read(ARGV[0])
 
 events.each do |event|
-  wp_event = WPEvent::Event.uuid_in_wordpress? event["uuid"]
+  wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
     info "event with uuid #{event['uuid']} found"
   else
     info "event with uuid #{event['uuid']} not found, creating"
     puts event
-    wp_event = WPEvent::Post.create event["uuid"],
+    wp_event = WPEvent::EventPost.create event["uuid"],
                                     event["name"],
                                     DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
                                     event["description"]

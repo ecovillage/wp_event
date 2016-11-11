@@ -53,12 +53,12 @@ end
 categories = JSON.parse File.read(ARGV[0])
 
 categories.each do |category|
-  wp_category = WPEvent::Category.uuid_in_wordpress? category["uuid"]
+  wp_category = WPEvent::CategoryPost.uuid_in_wordpress? category["uuid"]
   if wp_category
     WPEvent.logger.info "category with uuid #{category['uuid']} found"
   else
     WPEvent.logger.info "category with uuid #{category['uuid']} not found, creating"
-    wp_category = WPEvent::Category.create category["uuid"],
+    wp_category = WPEvent::CategoryPost.create category["uuid"],
                                            category["name"],
                                            category["description"]
   end
