@@ -56,7 +56,7 @@ end
 events = JSON.parse File.read(ARGV[0])
 
 events.each do |event|
-  wp_event = WPEvent::Post.uuid_in_wordpress? event["uuid"]
+  wp_event = WPEvent::Event.uuid_in_wordpress? event["uuid"]
   if wp_event
     info "event with uuid #{event['uuid']} found"
   else

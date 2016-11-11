@@ -1,7 +1,7 @@
 require "wp_event/version"
 
 require "wp_event/category"
-require "wp_event/post"
+require "wp_event/event"
 require "wp_event/couch_import/couch_event"
 require "wp_event/couch_import/couch_db"
 require "wp_event/logging"
@@ -39,7 +39,7 @@ module WPEvent
   end
 
   def self.find_all_posts
-    wp.getPosts(blog_id: 0, filter: {post_type: Post::TYPE})
+    wp.getPosts(blog_id: 0, filter: {post_type: Event::TYPE})
   end
 
   def self.wp

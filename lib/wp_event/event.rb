@@ -2,7 +2,7 @@ require 'date'
 require 'time'
 
 module WPEvent
-  module Post
+  module Event
 
     # An event has the following information:
     #   - referee
