@@ -40,9 +40,9 @@ Call with `wp_event --help` for information about the options.
 
 `wp_event --export -id 2`
 
-### wp_event_category
+### wp_category
 
-Execute as `wp_event_category` (or `bundle exec exe/wp_event_category` in development setup).
+Execute as `wp_category` (or `bundle exec exe/wp_category` in development setup).
 Call with `wp_event --help` for information about the options.
 
 ### sync_event_categories
