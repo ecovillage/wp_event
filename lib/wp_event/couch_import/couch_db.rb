@@ -19,6 +19,14 @@ module WPEvent
         rows = JSON.parse(RestClient.get(url))["rows"]
         rows.map{|r| get_doc r["id"]}
       end
+
+      def self.get_all_categories
+        # TODO this view actually includes all info (besides uuid?), no need to fetch one-by-one
+        url = BASE_URL + "_design/sl_seminar/_view/categories_all"
+        # Fetch the docs, one by one.
+        rows = JSON.parse(RestClient.get(url))["rows"]
+        rows.map{|r| get_doc r["id"]}
+      end
     end
   end
 end
