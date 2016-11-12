@@ -26,11 +26,20 @@ module WPEvent
     end
 
     def self.create uuid, name, text, attachment_id=nil
-      content = { post_type: TYPE,
-                  post_status: "publish",
-                  post_data: Time.now,
-                  post_content: text,
-                  post_title: name,
+      # TODO these might be helpful and are overly verbose, extract
+      if name.nil?
+        WPEvent.logger.warn "Name of category (#{uuid}) is nil! Setting to empty value."
+        name = ""
+      end
+      if text.nil?
+        WPEvent.logger.warn "Description of category (#{uuid}) is nil! Setting to empty value."
+        text = ""
+      end
+      content = { post_type:    TYPE,
+                  post_status:  "publish",
+                  post_data:    Time.now,
+                  post_content: text || "",
+                  post_title:   name || "",
                   # ids here?
                   #'terms_names' => array('category' => $cats, 'post_tag' => $ts )
                   # tags_input = ["name1", "name2" ... also valid?
