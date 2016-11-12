@@ -77,7 +77,6 @@ events.each do |event|
     info "event with uuid #{event['uuid']} found"
   else
     info "event with uuid #{event['uuid']} not found, creating"
-    puts event
     wp_event = WPEvent::EventPost.create event["uuid"],
                                          event["name"],
                                          DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
