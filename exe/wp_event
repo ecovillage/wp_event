@@ -3,7 +3,7 @@
 require 'wp_event'
 require 'optparse'
 require 'json'
-require 'date'
+require 'optparse/date' # this has to be documented in ruby! (TODO)
 
 extend WPEvent::Logging
 
@@ -15,10 +15,10 @@ option_parser = OptionParser.new do |opts|
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
   end
-  opts.on("-f", "--from DATE", "Events starting date") do |f|
+  opts.on("-f", "--from DATETIME", DateTime, "Events starting date as YYYY-MM-DD HH:MM") do |f|
     options[:from] = f
   end
-  opts.on("-t", "--to DATE", "Events ending date") do |t|
+  opts.on("-t", "--to DATETIME", DateTime, "Events ending date as YYYY-MM-DD HH:MM") do |t|
     options[:to] = t
   end
   opts.on("-i", "--id WPID", "Post ID (WP)") do |i|
@@ -104,9 +104,9 @@ if options[:uuid]
     exit 0
   end
 
-  attachment_id = nil
-  if file_path = options[:image_file]
-    attachment_id = upload_image file_path
+  if !event && (!options[:from] || !options[:to] || !options[:name] || !options[:description])
+    STDERR.puts "Need to specify --to, --from, --name and --description to create an event."
+    exit 6
   end
 
   # Export, Update or Create?
@@ -118,7 +118,7 @@ if options[:uuid]
                                   options[:description]
     # categories, attachment ...
 
-    puts "created"
+    info "event created (#{event})"
     post_id = event
   else
     post_id = event["post_id"]
