@@ -35,13 +35,14 @@ module WPEvent
       get_all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
     end
 
-    def self.create uuid, name, date_range, text, category_ids=[]
-      category_hashes = category_ids.map{|c| {key: 'event_categories', value: c}}
-      content = { post_type: TYPE,
-                  post_status: "publish",
-                  post_data: Time.now,
+    def self.create uuid, name, date_range, text, category_ids=[], featured_image_id=nil
+      category_hashes = category_ids.map{|c| {key: 'event_category_id', value: c}}
+
+      content = { post_type:    TYPE,
+                  post_status:  "publish",
+                  post_data:    Time.now,
                   post_content: text,
-                  post_title: name,
+                  post_title:   name,
                   # tags_input ...
                   terms_names: {'language' => ['Deutsch']},
                   custom_fields: [
@@ -50,6 +51,9 @@ module WPEvent
                       { key: "todate",   value: date_range.last.to_time.to_i }
                     ] | category_hashes,
                   post_author: 1 }
+      if featured_image_id
+        content["post_thumbnail"] = featured_image_id.to_s
+      end
 
       #puts content.to_yaml
       WPEvent::wp.newPost(blog_id: 0,
