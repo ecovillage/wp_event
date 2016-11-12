@@ -30,6 +30,9 @@ option_parser = OptionParser.new do |opts|
   opts.on("-n", "--name NAME", "Name ('title') of the event") do |n|
     options[:name] = n
   end
+  opts.on("-c", "--categories NAMES", Array, "Names of categories of the event, comma-separated") do |c|
+    options[:categories] = c
+  end
   opts.on("-d", "--description DESCRIPTION", "Description of the event") do |d|
     options[:description] = d
   end
@@ -78,17 +81,6 @@ rescue Errno::ENOENT
   exit 3
 end
 
-def upload_image file_path, post_id=nil
-  data = { name: file_path,
-           type: MIME::Types.type_for(file_path).first.to_s,
-           bits: XMLRPC::Base64.new(IO.read file_path),
-         }
-  # post_thumbnail { attachment_id } ...
-  data[post_id] = post_id if post_id
-  upload = WPEvent::wp.uploadFile(data: data)
-  puts "image uploaded"
-  id = upload["attachment_id"]
-end
 
 if options[:list]
   # uuid, name
@@ -109,14 +101,39 @@ if options[:uuid]
     exit 6
   end
 
+  cached_categories = nil
+
   # Export, Update or Create?
   if !event
-    event = WPEvent::Post.create options[:uuid],
-                                  options[:name],
-                                  # datetime ?
-                                  Date.parse(options[:from])..Date.parse(options[:to]),
-                                  options[:description]
-    # categories, attachment ...
+    category_ids = []
+    if options[:categories]
+      if cached_categories.nil?
+        cached_categories = WPEvent::CategoryPost.fetch_name_pid_map
+      end
+      category_ids = options[:categories].map{|category_name| cached_categories[category_name]}
+      if category_ids.include?(nil)
+        STDERR.puts "Some categories do not yet exist, aborting."
+        error "Some categories do not yet exist, aborting."
+        exit 7
+      else
+        info "All categories found"
+        debug "category ids: #{category_ids.join('\n')}"
+      end
+    end
+
+    attachment_id = nil
+    if file_path = options[:image_file]
+      upload = WPEvent::ImageUpload.new file_path # no post_id yet ...
+      attachment_id = upload.do_upload!
+      info "Image uploaded (#{attachment_id})"
+    end
+
+    event = WPEvent::EventPost.create options[:uuid],
+                                 options[:name],
+                                 options[:from]..options[:to],
+                                 options[:description],
+                                 category_ids,
+                                 attachment_id || nil
 
     info "event created (#{event})"
     post_id = event
