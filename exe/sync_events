@@ -14,7 +14,7 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of events with events registered in wordpress instance.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:)
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, category_names:)
     Will exit with 0 on success
 
   USAGE
@@ -53,9 +53,25 @@ rescue Errno::ENOENT
   exit 3
 end
 
+cached_categories = nil
+
 events = JSON.parse File.read(ARGV[0])
 
 events.each do |event|
+  # Fetch and memoize category ids.
+  category_ids = []
+  if event["category_names"]
+    if cached_categories.nil?
+      cached_categories = WPEvent::CategoryPost.fetch_name_pid_map
+    end
+    category_ids = (event["category_names"] || []).map {|cn| cached_categories[cn]}
+    if category_ids.include?(nil)
+      STDERR.puts "A required category does not exist, aborting."
+      error "A required category does not exist, aborting."
+      exit 7
+    end
+  end
+
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
     info "event with uuid #{event['uuid']} found"
@@ -63,10 +79,11 @@ events.each do |event|
     info "event with uuid #{event['uuid']} not found, creating"
     puts event
     wp_event = WPEvent::EventPost.create event["uuid"],
-                                    event["name"],
-                                    DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
-                                    event["description"]
-    puts wp_event
+                                         event["name"],
+                                         DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
+                                         event["description"],
+                                         category_ids
+    debug "created: #{wp_event}"
   end
 end
 
