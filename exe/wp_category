@@ -8,7 +8,7 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-  opts.separator "The standard: Create or update with ..."
+  opts.separator "The standard: Create or update category with ..."
   opts.on("-u", "--uuid UUID", "Events categories UUID") do |u|
     options[:uuid] = u
   end
