@@ -53,23 +53,17 @@ rescue Errno::ENOENT
   exit 3
 end
 
-cached_categories = nil
+category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 
 events = JSON.parse File.read(ARGV[0])
 
 events.each do |event|
   # Fetch and memoize category ids.
-  category_ids = []
-  if event["category_names"]
-    if cached_categories.nil?
-      cached_categories = WPEvent::CategoryPost.fetch_name_pid_map
-    end
-    category_ids = (event["category_names"] || []).map {|cn| cached_categories[cn]}
-    if category_ids.include?(nil)
-      STDERR.puts "A required category does not exist, aborting."
-      error "A required category does not exist, aborting."
-      exit 7
-    end
+  category_ids = category_cache.id_of_names event["category_names"]
+  if category_ids.include?(nil)
+    STDERR.puts "A required category does not exist, aborting."
+    error "A required category does not exist, aborting."
+    exit 7
   end
 
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]

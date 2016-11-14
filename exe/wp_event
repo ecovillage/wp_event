@@ -101,24 +101,19 @@ if options[:uuid]
     exit 6
   end
 
-  cached_categories = nil
+  category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 
   # Export, Update or Create?
   if !event
-    category_ids = []
-    if options[:categories]
-      if cached_categories.nil?
-        cached_categories = WPEvent::CategoryPost.fetch_name_pid_map
-      end
-      category_ids = options[:categories].map{|category_name| cached_categories[category_name]}
-      if category_ids.include?(nil)
-        STDERR.puts "Some categories do not yet exist, aborting."
-        error "Some categories do not yet exist, aborting."
-        exit 7
-      else
-        info "All categories found"
-        debug "category ids: #{category_ids.join('\n')}"
-      end
+    category_cache.id_of_names options[:categories]
+
+    if category_ids.include?(nil)
+      STDERR.puts "Some categories do not yet exist, aborting."
+      error "Some categories do not yet exist, aborting."
+      exit 7
+    else
+      info "All categories found"
+      debug "category ids: #{category_ids.join('\n')}"
     end
 
     attachment_id = nil
