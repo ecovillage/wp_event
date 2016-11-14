@@ -36,7 +36,7 @@ module WPEvent
 
       def self.pull_from_couchdb_between from, to
         begin
-          response = CouchDB.get_seminar_docs_by_month 2016, 11
+          response = CouchDB.get_seminar_docs_by_date from, to
           response.select! {|doc| doc.dig("g_value", "publish_web")}
           response.map do |document|
             from_couch_doc document
