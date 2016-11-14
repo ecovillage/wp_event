@@ -3,14 +3,14 @@ require 'json'
 module WPEvent
   module CouchImport
     class CouchEvent
-      attr_accessor :title, :description, :from, :to, :categories, :uuid, :document
-      def initialize uuid, title, description, from, to, categories, document=nil
+      attr_accessor :title, :description, :from, :to, :category_names, :uuid, :document
+      def initialize uuid, title, description, from, to, category_names, document=nil
         @uuid        = uuid
         @title       = title
         @description = description
         @from        = from
         @to          = to
-        @categories  = categories
+        @category_names = category_names
         @document    = document
       end
 
@@ -53,7 +53,8 @@ module WPEvent
           name:        @title,
           description: @description,
           fromdate:    @from,
-          todate:      @to
+          todate:      @to,
+          category_names: @category_names
         }.to_json(*a)
       end
     end
