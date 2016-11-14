@@ -2,6 +2,7 @@
 
 require 'wp_event'
 require 'optparse'
+require 'optparse/date' # this has to be documented in ruby! (TODO)
 require 'json'
 
 extend WPEvent::Logging
@@ -16,10 +17,10 @@ option_parser = OptionParser.new do |opts|
   USAGE
 
   opts.separator "Filtering options"
-  opts.on("-f", "--from DATE", "Events starting date") do |f|
+  opts.on("-f", "--from DATE", DateTime, "Events starting date (YYYY-MM-DD HH:MM)") do |f|
     options[:from] = f
   end
-  opts.on("-t", "--to DATE", "Events ending date") do |t|
+  opts.on("-t", "--to DATE", DateTime, "Events ending date (YYYY-MM-DD HH:MM)") do |t|
     options[:to] = t
   end
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
