@@ -1,0 +1,126 @@
+#!/usr/bin/env ruby
+
+#require 'time'
+#require 'date'
+require 'wp_event'
+require 'json'
+require 'optparse/date' # this has to be documented in ruby! (TODO)
+
+extend WPEvent::Logging
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
+  opts.separator "The standard: Create or update a referee with ..."
+  opts.on("-u", "--uuid UUID", "Events UUID") do |u|
+    options[:uuid] = u
+  end
+  opts.on("-i", "--id WPID", "Post ID (WP)") do |i|
+    options[:id] = i
+  end
+  opts.on("--image-file PATH", "Path to image file") do |i|
+    options[:image_file] = i
+  end
+  opts.on("-n", "--name NAME", "Name ('title') of the referee") do |n|
+    options[:name] = n
+  end
+  opts.on("-d", "--description DESCRIPTION", "Description of the referee") do |d|
+    options[:description] = d
+  end
+  opts.separator "Other actions (than create or update)"
+  opts.on("-l", "--list", "List categories") do |l|
+    options[:list] = l
+  end
+  opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
+    options[:export] = x
+  end
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+if !options[:id] && !options[:uuid] && !options[:list]
+  STDERR.puts "Please provide at least the referees (uu)id or specify the list action."
+  puts option_parser
+  exit 1
+end
+
+if options[:id] && options[:uuid]
+  STDERR.puts "Cannot handle both id and uuid, please specify only one of these options."
+  puts option_parser
+  exit 2
+end
+
+begin
+  WPEvent.load_conf
+rescue Errno::ENOENT
+  STDERR.puts "Config file (wp_event.conf) not found."
+  exit 3
+end
+
+
+if options[:list]
+  # uuid, name
+  puts WPEvent::RefereePost.fetch_name_pid_map.to_yaml
+  exit 0
+end
+
+# Check existence
+if options[:uuid]
+  referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
+  if options[:export]
+    STDOUT.puts JSON.pretty_generate(referee)
+    exit 0
+  end
+
+  if !referee && (!options[:name] || !options[:description])
+    STDERR.puts "Need to specify --name and --description to create a referee."
+    exit 6
+  end
+
+  if !referee
+    attachment_id = nil
+    if file_path = options[:image_file]
+      upload = WPEvent::ImageUpload.new file_path # no post_id yet ...
+      attachment_id = upload.do_upload!
+      info "Image uploaded (#{attachment_id})"
+    end
+
+    referee = WPEvent::RefereePost.create options[:uuid],
+                                        options[:name],
+                                        options[:description],
+                                        attachment_id || nil
+
+    info "referee created (#{referee})"
+    post_id = referee
+  else
+    puts "found, wont update, maybe(nyi)"
+    post_id = referee["post_id"]
+  end
+else
+  referee = WPEvent::RefereePost.by_post_id options[:id]
+  if options[:export]
+    STDOUT.puts JSON.pretty_generate(referee)
+    exit 0
+  else
+    STDERR.puts "Cannot deal with updates only atm"
+    exit 4
+  end
+end
+
+exit 0
