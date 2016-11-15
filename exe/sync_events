@@ -57,20 +57,19 @@ category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 
 events = JSON.parse File.read(ARGV[0])
 
-events.each do |event|
+
+events.each_with_index do |event, idx|
   # Fetch and memoize category ids.
   category_ids = category_cache.id_of_names event["category_names"]
   if category_ids.include?(nil)
-    STDERR.puts "A required category does not exist, aborting."
-    error "A required category does not exist, aborting."
-    exit 7
+    errxit 7, "A required category does not exist, aborting."
   end
 
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
     info "event with uuid #{event['uuid']} found"
   else
-    info "event with uuid #{event['uuid']} not found, creating"
+    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} not found, creating"
     wp_event = WPEvent::EventPost.create event["uuid"],
                                          event["name"],
                                          DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
