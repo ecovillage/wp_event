@@ -23,7 +23,7 @@ module WPEvent
     # init and return @name_id_map
     def name_id_map
       if @name_id_map.nil?
-        @name_id_map = cpt.send :fetch_name_pid_map
+        @name_id_map = cpt.send :name_pid_map
       end
       @name_id_map || {}
     end

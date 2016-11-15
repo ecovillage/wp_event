@@ -3,6 +3,7 @@ require 'time'
 
 module WPEvent
   module EventPost
+    extend WPEvent::PostType
 
     # An event has the following information:
     #   - referee
@@ -16,24 +17,6 @@ module WPEvent
 
     TYPE = 'ev7l-event'
 
-    def self.uuid_in_wordpress? uuid
-      in_wordpress? uuid
-    end
-
-    def self.by_post_id post_id
-      WPEvent::wp.getPost blog_id: 0,
-                          post_id: post_id
-    end
-
-    def self.get_all_posts
-      WPEvent::wp.getPosts blog_id: 0,
-                           filter: { post_type: TYPE , number: 100_000 }
-    end
-
-    def self.in_wordpress? uuid
-      # TODO extract lambda
-      get_all_posts.find {|p| p["custom_fields"].find {|f| f["key"] == "uuid" && f["value"] == uuid}}
-    end
 
     def self.create uuid, name, date_range, text, category_ids=[], featured_image_id=nil
       category_hashes = category_ids.map{|c| {key: 'event_category_id', value: c}}
