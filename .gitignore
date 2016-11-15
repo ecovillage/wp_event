@@ -11,3 +11,4 @@
 *.swo
 wp_event.conf
 *~
+*.json
