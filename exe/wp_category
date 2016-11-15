@@ -90,7 +90,7 @@ end
 
 # Actions
 if options[:list]
-  puts WPEvent::CategoryPost.fetch_name_pid_map.to_yaml
+  puts WPEvent::CategoryPost.name_pid_map.to_yaml
   exit 0
 end
 

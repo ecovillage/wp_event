@@ -84,7 +84,7 @@ end
 
 if options[:list]
   # uuid, name
-  puts WPEvent::EventPost.fetch_name_pid_map.to_yaml
+  puts WPEvent::EventPost.name_pid_map.to_yaml
   exit 0
 end
 
@@ -105,7 +105,7 @@ if options[:uuid]
 
   # Export, Update or Create?
   if !event
-    category_cache.id_of_names options[:categories]
+    category_ids = category_cache.id_of_names options[:categories]
 
     if category_ids.include?(nil)
       STDERR.puts "Some categories do not yet exist, aborting."

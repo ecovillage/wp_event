@@ -76,7 +76,7 @@ end
 
 if options[:list]
   # uuid, name
-  puts WPEvent::RefereePost.fetch_name_pid_map.to_yaml
+  puts WPEvent::RefereePost.name_pid_map.to_yaml
   exit 0
 end
 
