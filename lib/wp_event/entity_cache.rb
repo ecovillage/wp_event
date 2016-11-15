@@ -1,13 +1,15 @@
 module WPEvent
   class EntityCache
-    attr_accessor :cpt, :name_id_map
+    attr_accessor :cpt, :name_id_map, :uuid_id_map
 
-    # TODO make contract on cpt
+    # cpt has to be a WPEvent::PostType extending class/module
     def initialize cpt
       @cpt         = cpt
       @name_id_map = nil
-      # if !cpt.defined? :fetch_name_pid_map
-      #   raise ...
+      @uuid_id_map = nil
+      if !cpt.is_a? WPEvent::PostType
+        raise "Unsupported Entity for EntityCache: #{cpt.class}"
+      end
     end
 
     def id_of_name name
@@ -20,12 +22,29 @@ module WPEvent
       names.map{|name| name_id_map[name]}
     end
 
+    def id_of_uuid uuid
+      return [] if uuid.nil? || uuid.empty?
+      uuid_id_map[uuid]
+    end
+
+    def id_of_uuids uuids
+      return [] if uuids.nil? || uuids.empty?
+      uuids.map{|uuid| id_of_uuid uuid}
+    end
+
     # init and return @name_id_map
     def name_id_map
       if @name_id_map.nil?
-        @name_id_map = cpt.send :name_pid_map
+        @name_id_map = cpt.name_pid_map
       end
       @name_id_map || {}
+    end
+
+    def uuid_id_map
+      if @uuid_id_map.nil?
+        @uuid_id_map = cpt.uuid_pid_map
+      end
+      @uuid_id_map || {}
     end
   end
 end
