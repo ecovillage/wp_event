@@ -20,9 +20,14 @@ Or install it yourself as:
 
 ## Usage
 
-wp_event ships with a couple of tools
+wp_event ships with a couple of tools.
+These roughly follow the three basic custom wordpress post types: `Event`, `EventCategory` and `Referee` (the respective Wordpress CPTs are prefixed with `ev7l`, like `ev7l-event`).
 
-### wp_event.config
+For each type, there is one tool to list, update or create an entity with given (command line) parameters.
+There is one tool to update/'synchronize' the entities in the wordpress instance with a list of entities read from a (json) file.
+Finally, there is a tool to create a json file with legacy data from a supercustom couchdb; take this as an example if you like.
+
+### Global configuration with wp_event.config
 
 Tools rely on `wp_event.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory:
 
