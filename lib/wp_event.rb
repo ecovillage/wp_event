@@ -10,6 +10,7 @@ require "wp_event/couch_import/couch_event_category"
 require "wp_event/couch_import/couch_db"
 require "wp_event/couch_import/couch_importer"
 require "wp_event/cli/logging"
+require "wp_event/cli"
 
 require 'ostruct'
 require 'yaml'

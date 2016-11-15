@@ -4,7 +4,8 @@ require 'wp_event'
 require 'optparse'
 require 'json'
 
-extend WPEvent::Logging
+extend WPEvent::CLI::Logging
+extend WPEvent::CLI
 
 options = {}
 
@@ -49,8 +50,7 @@ end
 begin
   WPEvent.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
-  exit 3
+  errxit "Config file (wp_event.conf) not found.", 3
 end
 
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)

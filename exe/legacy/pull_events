@@ -5,7 +5,8 @@ require 'optparse'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
 require 'json'
 
-extend WPEvent::Logging
+extend WPEvent::CLI::Logging
+extend WPEvent::CLI
 
 options = {}
 
@@ -56,25 +57,27 @@ if !options[:outfile]
 end
 
 if File.exist?(options[:outfile])
-  STDERR.puts "Outfile #{options[:outfile]} exists, aborting."
-  exit 3
+  errxit 3, "Outfile #{options[:outfile]} exists, aborting."
 end
 
 if options[:from] && options[:to] && options[:uuid]
-  STDERR.puts "Cannot specify --from, --to AND --uuid, aborting."
-  exit 2
+  errxit 2, "Cannot specify --from, --to AND --uuid, aborting."
 end
 
 if !!options[:from] != !!options[:to]
-  STDERR.puts "Have to specify --from when --to is specified (and vice versa)."
-  exit 2
+  errxit 2, "Have to specify --from when --to is specified (and vice versa)."
 end
 
 if options[:from] && options[:to]
   # Range given
   events = WPEvent::CouchImport::CouchEvent.pull_from_couchdb_between options[:from], options[:to]
-  File.open(options[:outfile], 'w') << events.to_json
-  debug "Output: #{events.to_json}"
+  if events.nil? || events.empty?
+    info "No matching event found"
+  else
+    File.open(options[:outfile], 'w') << events.to_json
+    debug "Output: #{events.to_json}"
+    debug "Original: #{events.map(&:document)}"
+  end
 elsif options[:uuid]
   # uuid given
   event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]

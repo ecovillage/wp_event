@@ -5,7 +5,7 @@ require 'optparse'
 require 'json'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
 
-extend WPEvent::Logging
+extend WPEvent::CLI::Logging
 
 options = {}
 
