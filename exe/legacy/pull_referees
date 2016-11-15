@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+
+extend WPEvent::CLI::Logging
+extend WPEvent::CLI
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options]
+
+    Write json file with referee information.
+
+  USAGE
+
+  opts.separator "Filtering options"
+  opts.on("-u", "--uuid UUID", "Referee UUID") do |u|
+    options[:uuid] = u
+  end
+  opts.separator "Output options"
+  opts.on("-o", "--outfile FILE", "File to write data (json) to, '-' for STDOUT (then log to STDERR)") do |o|
+    options[:outfile] = o
+  end
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+if options[:outfile] == "-"
+  WPEvent.logger = Logger.new(STDERR)
+end
+
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+if !options[:outfile]
+  STDERR.puts "Need to specify --outfile"
+  puts
+  puts option_parser
+  exit 2
+end
+
+if options[:outfile] != '-' && File.exist?(options[:outfile])
+  errxit 3, "Outfile #{options[:outfile]} exists, aborting."
+end
+
+def get_outfile outfile
+  if outfile == '-'
+    $stdout
+  else
+    File.open(outfile, 'w')
+  end
+end
+
+outfile = get_outfile(options[:outfile])
+
+if options[:uuid]
+  # uuid given
+  referee = WPEvent::CouchImport::CouchReferee.pull_from_couchdb options[:uuid]
+  if referee.nil?
+    warn "referee with uuid #{options[:uuid]} not found"
+    exit 5
+  else
+    info "referee with uuid #{options[:uuid]} found"
+    debug "Output: #{[referee].to_json}"
+    debug "Original document: #{referee.document}"
+    outfile << [referee].to_json
+  end
+else
+  # default, pull all
+  referees = WPEvent::CouchImport::CouchImporter.get_all_referees
+  if referees.nil? || referees.empty?
+    error "No referees found!"
+    exit 5
+  else
+    info "#{referees.length} referees found."
+    outfile << referees.to_json
+    debug "Output: #{referees.to_json}"
+  end
+end
+
+exit 0
