@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+require 'optparse'
+require 'json'
+
+extend WPEvent::CLI::Logging
+extend WPEvent::CLI
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options] FILE
+
+    Sync a list of referees with referees registered in wordpress instance
+
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:)
+    Will exit with 0 on success
+
+  USAGE
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+WPEvent.logger.debug "Starting referee sync (#{WPEvent::VERSION})"
+
+# Process options
+option_parser.parse!
+
+if ARGV.length != 1
+  STDERR.puts "Please provide json input file."
+  puts option_parser
+  exit 1
+end
+
+begin
+  WPEvent.load_conf
+rescue Errno::ENOENT
+  errxit 3, "Config file (wp_event.conf) not found."
+end
+
+referees = JSON.parse File.read(ARGV[0])
+
+referees.each_with_index do |referee, idx|
+  # Check one by one, because we need to check if we have to update.
+  # Otherwise, an EntityCache could be used.
+  wp_referee = WPEvent::RefereePost.uuid_in_wordpress? referee["uuid"]
+  if wp_referee
+    info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} found"
+  else
+    info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} not found, creating"
+    wp_referee = WPEvent::RefereePost.create referee["uuid"],
+                                             referee["name"],
+                                             referee["description"]
+  end
+end
+
+exit 0
