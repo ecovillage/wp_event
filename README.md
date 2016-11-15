@@ -120,6 +120,7 @@ We deal with three separate abstraction layers of entities (which correspond to 
     - checking for existence of Posts with specific uuid metadata-key (and value)
     - returning wordpress data for given post (but **not** as an instance of EventPost!)
     It thus has multiple responsabilities that are not yet nicely separated or united.
+    It is a **module** though, so we do not deal with objects in the typical sense on that layer (in contrast to ActiveRecord pattern).
   - a command line interface for creation and listing (in `exe/wp_event`)
   - the json representation, consumed in `exe/sync_events`, created in `exe/legacy/pull_events`
   - a legacy representation in `couch_event`
@@ -131,6 +132,13 @@ To speed up access and bundle common data fetching and querying functionality, a
 In the longer run, all the lookup and low-level access should be moved to the `PostType`, `EntityCache` and possible other modules and classes.
 
 The idea is to keep the entity classes itself lean (in contrast to glue the persistence layer directly to them).
+
+### Legacy import code
+
+Legacy data is imported via an `export` to json in our example.
+The `CouchImporter` does bulk mapping of couchdb documents to `couch_\<entity\>` classes like `CouchEvent` (which then do the mapping themselves).
+
+The `CouchDB` module deals with picking up data from specific views (or documents).
 
 ## Contributing
 
