@@ -2,7 +2,7 @@ module WPEvent
   # Include this module to include a thin layer towards the persistence
   # engine (Wordpress... :) ).
   #
-  # Your including class needs to specify the TYPE constant.
+  # Your including class or module needs to specify the TYPE constant.
   module PostType
     # Return all posts (wordpress response) of type.
     def get_all_posts
@@ -27,6 +27,14 @@ module WPEvent
 
     def name_pid_map
       get_all_posts.map {|p| [p["post_title"], p["post_id"]]}.to_h
+    end
+
+    def uuid_pid_map
+      get_all_posts.map do |post|
+        # TODO lambda
+        uuid = post["custom_fields"].find {|f| f["key"] == "uuid"}&.fetch("value", nil)
+        [uuid, post["post_id"]]
+      end.to_h
     end
   end
 end
