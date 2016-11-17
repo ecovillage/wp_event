@@ -15,7 +15,7 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of events with events registered in wordpress instance.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, category_names:)
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, category_names:, referee_qualifications: [{uuid:, qualification:}])
     Will exit with 0 on success
 
   USAGE
@@ -54,6 +54,7 @@ rescue Errno::ENOENT
 end
 
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 
 events = JSON.parse File.read(ARGV[0])
 
@@ -65,16 +66,28 @@ events.each_with_index do |event, idx|
     errxit 7, "A required category does not exist, aborting."
   end
 
+  # from {uuid: 1, q: '2'} we need {id: 123, q: '2'}
+  referee_data = (event["referee_qualifications"] || []).map do |ref_qua|
+    { id: referee_cache.id_of_uuid(ref_qua["uuid"]),
+      qualification: ref_qua["qualification"] }
+  end
+
+  if missing_referee = referee_data.detect {|r| r[:id].nil?}
+    errxit 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
+  end
+
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
-    info "event with uuid #{event['uuid']} found"
+    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} found"
+    debug wp_event
   else
     info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} not found, creating"
     wp_event = WPEvent::EventPost.create event["uuid"],
                                          event["name"],
                                          DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
                                          event["description"],
-                                         category_ids
+                                         category_ids,
+                                         referee_data
     debug "created: #{wp_event}"
   end
 end

@@ -18,8 +18,21 @@ module WPEvent
     TYPE = 'ev7l-event'
 
 
-    def self.create uuid, name, date_range, text, category_ids=[], featured_image_id=nil
+    # Create a post of custom post_type in wordpress instance.
+    # - name is the title
+    # - date_range is a range of two dates (start to end),
+    # - text is the content
+    # - uuid and category_ids are meta data for relations
+    # - referee_qualification is a list of hashes (id, qualification)
+    def self.create uuid, name, date_range, text, category_ids=[], referee_qualifications=[], featured_image_id=nil
       category_hashes = category_ids.map{|c| {key: 'event_category_id', value: c}}
+      referee_hashes  = referee_qualifications.map do |referee_q|
+        [ { key: 'referee_id',
+            value: referee_q[:id] },
+          { key: "referee_#{referee_q[:id]}_qualification",
+            value: referee_q[:qualification] }
+        ]
+      end.flatten
 
       content = { post_type:    TYPE,
                   post_status:  "publish",
