@@ -37,4 +37,3 @@ module WPEvent
     end
   end
 end
-

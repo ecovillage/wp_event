@@ -69,6 +69,7 @@ if options[:uuid]
   end
 else
   # default, pull all
+  debug "Pulling all categories"
   categories = WPEvent::CouchImport::CouchImporter.get_all_categories
   if categories.nil? || categories.empty?
     error "No event categories found!"
@@ -77,6 +78,7 @@ else
     info "#{categories.length} categories found."
     File.open(options[:outfile], 'w') << categories.to_json
     debug "Output: #{categories.to_json}"
+    info "Wrote #{categories.length} categories to #{options[:outfile]}."
   end
 end
 

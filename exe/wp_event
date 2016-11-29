@@ -11,7 +11,7 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-  opts.separator "The standard: Create or update event with ..."
+  opts.separator "Default action: Create or update event with ..."
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
   end
