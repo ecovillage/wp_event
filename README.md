@@ -20,7 +20,6 @@ And execute:
 
     $ bundle
 
-
 ## Usage
 
 wp_event ships with a couple of tools.
@@ -34,17 +33,28 @@ For each type, three tools exist:
 
 ### Global configuration with wp_event.config
 
-Tools rely on `wp_event.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory:
+Tools rely on the file `wp_event.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory (listing Wordpress credentials):
 
     # wp_event.conf
-    host: "wp_event.mydomain"
+    host:     "wp_event.mydomain"
     username: "admin"
     password: "buzzword"
 
 ### wp_event
 
+Creates, updates or exports an event.
 Execute as `wp_event` (or `bundle exec exe/wp_event` in development setup).
-Call with `wp_event --help` for information about the options.
+Call like `wp_event --help` for information about the options.
+
+An example usage might look like
+
+    $ wp_event --uuid 1234-4321-1234-4321 \
+               --from "2017-02-20 10:00" \
+               --to   "2017-02-22 18:00" \
+               --name "Circles of friendship" \
+               --categories "Social,Fun,Sponsored" \
+               --referees   "Felix Wolfsteller" \
+               --description "Rather long text, <em>with</em> markup ..."
 
 #### export an event
 
@@ -52,8 +62,15 @@ Call with `wp_event --help` for information about the options.
 
 ### wp_category
 
+Creates or updates an event category.
 Execute as `wp_category` (or `bundle exec exe/wp_category` in development setup).
-Call with `wp_event --help` for information about the options.
+Call like `wp_category --help` for information about the options.
+
+### wp_referee
+
+Creates or updates a referee.
+Execute as `wp_referee` (or `bundle exec exe/wp_category` in development setup).
+Call with `wp_referee --help` for information about the options.
 
 ### sync_categories
 
@@ -71,6 +88,8 @@ Consumes a JSON file with event categories like this
         "description": "Events dealing with nondestructive nutrition"
       }
     ]
+
+and change corresponding data (identified by the UUID) in the wordpress instance.
 
 ### sync_events
 
@@ -93,11 +112,32 @@ Consumes a JSON file with event categories like this
       }
     ]
 
-### Import data from legacy database
+and change corresponding data (identified by the UUID) in the wordpress instance.
 
-As long as you can export your data from the legacy database into json format (as given above), you'll be fine.  If you have problems in doing so, feel free to contact us.
+### sync_referees
 
-For Sieben Linden legacy data, export of it is shipped within this gem (with most code residing in `lib/wp_event/couch_import` and `exe/legacy`).
+Consumes a JSON file with referee information like this
+
+    [
+      {
+        "uuid": "1a3b-1234-abcd-defa",
+        "name": "Hannah Barber",
+      },
+      {
+        "uuid": "a123-a234-abcd-def1",
+        "name": "Josh Conceptual",
+      }
+    ]
+
+and change corresponding data (identified by the UUID) in the wordpress instance.
+
+### Import data from legacy databases
+
+As long as you can export your data from the legacy database into the json format (as given above), you'll be fine.  If you have problems in doing so, feel free to contact us.
+
+For Sieben Linden legacy data, export functionality of it is shipped within this gem (with most code residing in `lib/wp_event/couch_import` and `exe/legacy`).
+
+The generated JSON files can then be used to update the data found in the wordpress installation.
 
 ## Wordpress setup
 
