@@ -32,6 +32,9 @@ option_parser = OptionParser.new do |opts|
   end
 end
 
+# Process options
+option_parser.parse!
+
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 debug "Starting event category sync (#{WPEvent::VERSION})"
