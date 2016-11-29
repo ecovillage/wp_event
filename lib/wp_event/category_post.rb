@@ -40,6 +40,15 @@ module WPEvent
                           content: content)
     end
 
+    def self.update post_id, name, text, attachment_id=nil
+      content = { post_content: text || "",
+                  post_title:   name || ""}
+      WPEvent::wp.editPost(blog_id: 0,
+                           post_id: post_id,
+                           content: content)
+      # TODO attachment changes
+    end
+
     def self.add_event event_pid, event_category_pid
       category = self.by_post_id event_category_pid
       event_data = category["custom_fields"].select{|f| f["key"] = 'event_ids'}
