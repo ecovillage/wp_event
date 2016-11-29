@@ -44,10 +44,10 @@ module WPEvent
       @fields.select {|f| f.key =~ key_regex}
     end
 
-    # merges second metadata into first.
+    # merges second metadata into self.
     # add empty (except for 'id') fields to mark removal (wp xmlrpc)
     # sets id of old custom field entries
-    def merge old_metadata
+    def merge! old_metadata
       old_metadata.each do |field|
         if f = field_with_key_value(field.key, field.value)
           if f.id

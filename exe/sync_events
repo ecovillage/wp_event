@@ -78,8 +78,15 @@ events.each_with_index do |event, idx|
 
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
-    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} found"
-    debug wp_event
+    post_id = wp_event['post_id']
+    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} (WP-ID #{post_id}) found, updating"
+    WPEvent::EventPost.update wp_event,
+                              event["name"],
+                              DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
+                              event["description"],
+                              category_ids,
+                              referee_data
+
   else
     info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} not found, creating"
     wp_event = WPEvent::EventPost.create event["uuid"],

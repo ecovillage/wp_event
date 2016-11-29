@@ -60,14 +60,16 @@ module WPEvent
                     category_ids=[], referee_qualifications=[],
                     featured_image_id=nil
 
-      # TODO image, categories, date range ....
       referee_hashes = referee_qualification_updates(wp_post, referee_qualifications)
 
       content = {
         post_title:   name,
         post_content: text,
-        custom_fields: referee_hashes
+        custom_fields: referee_hashes | category_updates(wp_post, category_ids) | [
+                      { key: "fromdate", value: date_range.first.to_time.to_i },
+                      { key: "todate",   value: date_range.last.to_time.to_i }]
       }
+      # TODO image
 
       WPEvent::wp.editPost(blog_id: 0,
                            post_id: wp_post['post_id'],
@@ -90,11 +92,24 @@ module WPEvent
       old_meta_data = WPEvent::PostMetaData.new wp_event
       old_ref_ids = old_meta_data.fields_with_key('referee_id')
 
-      result_meta_data.merge old_ref_ids
+      result_meta_data.merge! old_ref_ids
 
       old_ref_qs = old_meta_data.fields_with_key_regex(/referee_\d*_qualification/)
-      result_meta_data.merge old_ref_qs
+      result_meta_data.merge! old_ref_qs
 
+      result_meta_data.to_custom_fields_hash
+    end
+
+    def self.category_updates wp_event, category_ids
+      result_meta_data = WPEvent::PostMetaData.new
+
+      category_ids.each do |c|
+        result_meta_data.add nil, 'event_category_id', c
+      end
+
+      old_meta_data = WPEvent::PostMetaData.new wp_event
+      old_categories = old_meta_data.fields_with_key('event_category_id')
+      result_meta_data.merge! old_categories
       result_meta_data.to_custom_fields_hash
     end
   end
