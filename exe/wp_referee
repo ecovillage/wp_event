@@ -6,7 +6,8 @@ require 'wp_event'
 require 'json'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
 
-extend WPEvent::Logging
+extend WPEvent::CLI::Logging
+extend WPEvent::CLI
 
 options = {}
 
@@ -84,6 +85,9 @@ end
 if options[:uuid]
   referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
   if options[:export]
+    if !referee
+      errxit 4, "Referee not found"
+    end
     STDOUT.puts JSON.pretty_generate(referee)
     exit 0
   end

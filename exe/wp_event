@@ -6,6 +6,7 @@ require 'json'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
 
 extend WPEvent::CLI::Logging
+extend WPEvent::CLI
 
 options = {}
 
@@ -37,7 +38,7 @@ option_parser = OptionParser.new do |opts|
     options[:description] = d
   end
   opts.separator "Other actions (than create or update)"
-  opts.on("-l", "--list", "List categories") do |l|
+  opts.on("-l", "--list", "List events") do |l|
     options[:list] = l
   end
   opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
@@ -124,11 +125,11 @@ if options[:uuid]
     end
 
     event = WPEvent::EventPost.create options[:uuid],
-                                 options[:name],
-                                 options[:from]..options[:to],
-                                 options[:description],
-                                 category_ids,
-                                 attachment_id || nil
+                                      options[:name],
+                                      options[:from]..options[:to],
+                                      options[:description],
+                                      category_ids,
+                                      attachment_id || nil
 
     info "event created (#{event})"
     post_id = event
@@ -141,8 +142,7 @@ else
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   else
-    STDERR.puts "Cannot deal with updates only atm"
-    exit 4
+    errxit 4, "Cannot deal with updates only atm"
   end
 end
 
