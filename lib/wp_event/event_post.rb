@@ -67,6 +67,7 @@ module WPEvent
         post_title:   name,
         post_content: text,
         custom_fields: referee_hashes
+      }
 
       WPEvent::wp.editPost(blog_id: 0,
                            post_id: wp_post['post_id'],
