@@ -87,36 +87,13 @@ module WPEvent
         result_meta_data.add nil, "referee_#{ref_q[:id]}_qualification", ref_q[:qualification]
       end
 
-      meta_data = WPEvent::PostMetaData.new wp_event
-      meta_data.fields_with_key('referee_id').each do |field|
-        if rf = result_meta_data.field_with_key_value(field.key, field.value)
-          if rf.id
-            # Get rid of an encountered duplicate (will delete for empty values)
-            result_meta_data.add field.id, nil, nil
-          else
-            # Set the id (change fields value)
-            rf.id = field.id
-          end
-        else
-          # No entry for this ref yet, delete it!
-          result_meta_data.add field.id, nil, nil
-        end
-      end
+      old_meta_data = WPEvent::PostMetaData.new wp_event
+      old_ref_ids = old_meta_data.fields_with_key('referee_id')
 
-      meta_data.fields_with_key_regex(/referee_\d*_qualification/).each do |field|
-        if rf = result_meta_data.fields_with_key(field.key).first
-          if rf.id
-            # Get rid of an encountered duplicate (will delete for empty values)
-            result_meta_data.add field.id, nil, nil
-          else
-            # Set the id (change fields value)
-            rf.id = field.id
-          end
-        else
-          # No entry for this ref yet, delete it!
-          result_meta_data.add field.id, nil, nil
-        end
-      end
+      result_meta_data.merge old_ref_ids
+
+      old_ref_qs = old_meta_data.fields_with_key_regex(/referee_\d*_qualification/)
+      result_meta_data.merge old_ref_qs
 
       result_meta_data.to_custom_fields_hash
     end
