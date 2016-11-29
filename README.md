@@ -1,22 +1,25 @@
 # WPEvent
 
-Ruby scripts to populate siebenlinden.org wordpress installation with event, referee and event category data.
+Ruby scripts to populate siebenlinden.org wordpress installation with event, referee and event category data.  The companion for the [ev7l-events Wordpress Plugin](https://github.com/ecovillage/ev7l-events).
+
+Licensed under the GPLv3+, Copyright 2016 Felix Wolfsteller.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+To use the **standalone** functionality, install it yourself as:
+
+    $ gem install auto_event_post
+
+For **library usage** add this line to your application's Gemfile:
 
 ```ruby
 gem 'auto_event_post'
 ```
 
-And then execute:
+And execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install auto_event_post
 
 ## Usage
 
