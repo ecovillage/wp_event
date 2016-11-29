@@ -44,6 +44,26 @@ module WPEvent
       @fields.select {|f| f.key =~ key_regex}
     end
 
+    # merges second metadata into first.
+    # add empty (except for 'id') fields to mark removal (wp xmlrpc)
+    # sets id of old custom field entries
+    def merge old_metadata
+      old_metadata.each do |field|
+        if f = field_with_key_value(field.key, field.value)
+          if f.id
+            # Get rid of an encountered duplicate (will delete for empty values)
+            add field.id, nil, nil
+          else
+            # Set the id (change fields value)
+            f.id = field.id
+          end
+        else
+          # No entry for this ref yet, delete it!
+          add field.id, nil, nil
+        end
+      end
+    end
+
     def to_custom_fields_hash
       result = @fields.map do |field|
         hsh = {}
