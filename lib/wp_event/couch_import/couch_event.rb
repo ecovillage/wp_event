@@ -5,9 +5,10 @@ module WPEvent
     class CouchEvent
       attr_accessor :title, :description,
         :from, :to, :category_names, :uuid,
-        :document, :referee_and_qualifications
+        :document, :referee_and_qualifications,
+        :image_url
 
-      def initialize uuid, title, description, from, to, category_names, referee_and_qualifications, document=nil
+      def initialize uuid, title, description, from, to, category_names, referee_and_qualifications, document=nil, image_url=nil
         @uuid        = uuid
         @title       = title
         @description = description
@@ -16,6 +17,7 @@ module WPEvent
         @category_names = category_names
         @referee_and_qualifications = referee_and_qualifications
         @document    = document
+        @image_url   = image_url
       end
 
       def self.extract_referees document
@@ -31,7 +33,8 @@ module WPEvent
           Date.strptime(document.dig("g_value", "date_to"),   "%d.%m.%Y"),
           document.dig("g_value", "categories"),
           extract_referees(document),
-          document
+          document,
+          document.dig("g_value", "thumbnail")
       end
 
       def self.pull_from_couchdb uuid
@@ -65,7 +68,8 @@ module WPEvent
           fromdate:       @from,
           todate:         @to,
           category_names: @category_names,
-          referee_qualifications: @referee_and_qualifications
+          referee_qualifications: @referee_and_qualifications,
+          image_url:      @image_url
         }.to_json(*a)
       end
     end
