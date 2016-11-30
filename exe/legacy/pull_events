@@ -3,7 +3,9 @@
 require 'wp_event'
 require 'optparse'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
+
 require 'json'
+require 'date'
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
@@ -68,17 +70,15 @@ if !!options[:from] != !!options[:to]
   errxit 2, "Have to specify --from when --to is specified (and vice versa)."
 end
 
-if options[:from] && options[:to]
-  # Range given
-  events = WPEvent::CouchImport::CouchEvent.pull_from_couchdb_between options[:from], options[:to]
-  if events.nil? || events.empty?
-    info "No matching event found"
-  else
-    File.open(options[:outfile], 'w') << events.to_json
-    debug "Output: #{events.to_json}"
-    debug "Original: #{events.map(&:document)}"
-  end
-elsif options[:uuid]
+if !options[:from] && !options[:to] && !options[:uuid]
+  info "Neither time range (--from, --to) nor uuid (--uuid) given, pulling this years events."
+  options[:from] = Date.civil(Date.today.year, 1, 1)
+  options[:to]   = Date.civil(options[:from].year, 12, 31)
+  puts options[:from]
+  puts options[:to]
+end
+
+if options[:uuid]
   # uuid given
   event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
   if event.nil?
@@ -89,10 +89,19 @@ elsif options[:uuid]
     File.open(options[:outfile], 'w') << [event].to_json
     debug "Output: #{[event].to_json}"
   end
+elsif options[:from] && options[:to]
+  # Range given
+  events = WPEvent::CouchImport::CouchEvent.pull_from_couchdb_between options[:from], options[:to]
+  if events.nil? || events.empty?
+    info "No matching event found"
+  else
+    File.open(options[:outfile], 'w') << events.to_json
+    debug "Output: #{events.to_json}"
+    debug "Original: #{events.map(&:document)}"
+  end
+  info "#{events.count} events found and written to #{options[:outfile]}"
 else
-  # default
-  STDERR.puts "default nyi"
-  exit 5
+  errxit 5, "No simple default behaviour specified"
 end
 
 exit 0
