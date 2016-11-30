@@ -66,8 +66,7 @@ end
 
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
-
-events = JSON.parse File.read(ARGV[0])
+media_cache    = WPEvent::MediaLibraryCache.new
 
 
 events.each_with_index do |event, idx|
