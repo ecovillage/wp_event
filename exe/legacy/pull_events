@@ -6,6 +6,8 @@ require 'optparse/date' # this has to be documented in ruby! (TODO)
 
 require 'json'
 require 'date'
+require 'fileutils'
+require "open-uri"
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
@@ -28,6 +30,12 @@ option_parser = OptionParser.new do |opts|
   end
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
+  end
+  opts.on("-i", "--image-source=URL", "Where to get images from") do |i|
+    options[:image_source] = i
+  end
+  opts.on("-s", "--image-store=PATH", "Where to store images") do |s|
+    options[:image_store] = s
   end
   opts.separator "Output options"
   opts.on("-o", "--outfile FILE", "File to write data (json) to") do |o|
@@ -74,9 +82,25 @@ if !options[:from] && !options[:to] && !options[:uuid]
   info "Neither time range (--from, --to) nor uuid (--uuid) given, pulling this years events."
   options[:from] = Date.civil(Date.today.year, 1, 1)
   options[:to]   = Date.civil(options[:from].year, 12, 31)
-  puts options[:from]
-  puts options[:to]
 end
+
+if options[:image_store]
+  begin
+    FileUtils::mkdir_p(options[:image_store])
+    info "Created image store directory #{options[:image_store]}"
+  rescue Exception => e
+    debug "Image store could not be created: #{$@}"
+    errxit 7, "Image store could not be created: #{$!}"
+  end
+end
+
+def download(url, path)
+  File.open(path, "w") do |f|
+    IO.copy_stream(open(url), f)
+  end
+  info "Downloaded into #{path}"
+end
+
 
 if options[:uuid]
   # uuid given
@@ -95,6 +119,24 @@ elsif options[:from] && options[:to]
   if events.nil? || events.empty?
     info "No matching event found"
   else
+    events.each do |event|
+      if !event.image_url.to_s.strip.empty?
+        if !options[:image_source] || !options[:image_store]
+          warn "Image source (--image-source) and/or image store (--image-store) not specified, skipping."
+        else
+          store_path = File.join(options[:image_store], event.image_url)
+          if File.exist?(store_path)
+            info "Image file #{event.image_url} already present in image store"
+          else
+            uri = URI.join(options[:image_source], event.image_url)
+            info "Downloading image file from #{uri}"
+            download(uri, File.join(options[:image_store], event.image_url))
+            debug "Download finished."
+          end
+        end
+      end
+    end
+
     File.open(options[:outfile], 'w') << events.to_json
     debug "Output: #{events.to_json}"
     debug "Original: #{events.map(&:document)}"
