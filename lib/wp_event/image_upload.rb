@@ -4,7 +4,7 @@ module WPEvent
   class ImageUpload
     attr_accessor :file_path, :post_id
 
-    def initialize file_path, post_id
+    def initialize file_path, post_id=nil
       @file_path = file_path
       @post_id   = post_id
     end

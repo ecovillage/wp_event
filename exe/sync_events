@@ -15,10 +15,14 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of events with events registered in wordpress instance.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, category_names:, referee_qualifications: [{uuid:, qualification:}])
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}])
     Will exit with 0 on success
 
   USAGE
+
+  opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
+    options[:image_store] = s
+  end
 
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
@@ -67,7 +71,7 @@ end
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
-
+image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
 events.each_with_index do |event, idx|
   # Fetch and memoize category ids.
@@ -88,23 +92,32 @@ events.each_with_index do |event, idx|
 
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
   if wp_event
+    # Exists, update
     post_id = wp_event['post_id']
     info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} (WP-ID #{post_id}) found, updating"
+
+    attachment_id = image_uploader.process event['image_url']
+
     WPEvent::EventPost.update wp_event,
                               event["name"],
                               DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
                               event["description"],
                               category_ids,
-                              referee_data
+                              referee_data,
+                              attachment_id
 
   else
+    # New, create
     info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} not found, creating"
+    attachment_id = image_uploader.process event['image_url']
+
     wp_event = WPEvent::EventPost.create event["uuid"],
                                          event["name"],
                                          DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
                                          event["description"],
                                          category_ids,
-                                         referee_data
+                                         referee_data,
+                                         attachment_id
     debug "created: #{wp_event}"
   end
 end

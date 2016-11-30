@@ -1,6 +1,8 @@
 module WPEvent
   # Cache name->id for media items
   # pretty wet copy of entitycache. Unclear how to DRY this up.
+  # Wordpress apparently lowercases file endings on upload, so this fact
+  # is respected in the lookup (only file ending is modified).
   class MediaLibraryCache
     attr_accessor :name_id_map
 
@@ -12,14 +14,16 @@ module WPEvent
     # if necessary
     def id_of_name name
       return [] if name.nil? || name.empty?
-      name_id_map[name]
+      # Downcase file ending
+      name_for_wp = File.basename(name, '.*') + File.extname(name).downcase
+      name_id_map[name_for_wp]
     end
 
     # return array of ids to given names, initializing the cache
     # if necessary
     def id_of_names names
       return [] if names.nil? || names.empty?
-      names.map{|name| name_id_map[name]}
+      names.map{|name| id_of_name name }
     end
 
     # init and return @name_id_map

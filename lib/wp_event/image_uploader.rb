@@ -16,7 +16,7 @@ module WPEvent
     # Returns attachment id of an image already uploaded
     # or attachment_id of image after fresh upload
     # (or nil if path empty)
-    def process rel_path
+    def process rel_path, wp_event=nil
       return nil if rel_path.to_s.strip.empty?
 
       # Do we need URI encoding here?

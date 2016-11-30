@@ -69,7 +69,17 @@ module WPEvent
                       { key: "fromdate", value: date_range.first.to_time.to_i },
                       { key: "todate",   value: date_range.last.to_time.to_i }]
       }
-      # TODO image
+
+      # Filename: old_image_url = wp_post.dig("post_thumbnail", "link")
+      #           uri = URI.parse(URI.encode old_image_url)
+      #           old_image_filename = File.basename uri.path
+      # attachment_id:
+      # (If not set, post_thumbnail is an empty array).
+      old_attachment_id = wp_post['post_thumbnail'].to_h["attachment_id"]
+
+      if old_attachment_id.to_s != featured_image_id.to_s
+        content["post_thumbnail"] = featured_image_id.to_s
+      end
 
       WPEvent::wp.editPost(blog_id: 0,
                            post_id: wp_post['post_id'],
