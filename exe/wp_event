@@ -109,9 +109,7 @@ if options[:uuid]
     category_ids = category_cache.id_of_names options[:categories]
 
     if category_ids.include?(nil)
-      STDERR.puts "Some categories do not yet exist, aborting."
-      error "Some categories do not yet exist, aborting."
-      exit 7
+      errxit 7, "Some categories do not yet exist, aborting."
     else
       info "All categories found"
       debug "category ids: #{category_ids.join('\n')}"
