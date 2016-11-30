@@ -161,22 +161,26 @@ Aim is to not reimplement ActiveRecord and work in agile fashion with intermedia
 We deal with three separate abstraction layers of entities (which correspond to Wordpress Posts of a Custom Post Type).  On example of `Event`:
 
   - the **post** `lib/wp_event/event_post.rb` handles
-    - creation of new 'Event' Posts.
-    - checking for existence of Posts with specific uuid metadata-key (and value)
-    - returning wordpress data for given post (but **not** as an instance of EventPost!)
+    - creation and update of new 'Event' Posts.
+    - checking for existence of Posts with specific uuid metadata-key (and value).
+    - returning wordpress data for given post (but **not** as an instance of EventPost!).
     It thus has multiple responsabilities that are not yet nicely separated or united.
     It is a **module** though, so we do not deal with objects in the typical sense on that layer (in contrast to ActiveRecord pattern).
   - a command line interface for creation and listing (in `exe/wp_event`)
   - the json representation, consumed in `exe/sync_events`, created in `exe/legacy/pull_events`
   - a legacy representation in `couch_event`
 
-As the entities share a lot of common structure, part of its functionality (that goes i.e. beyond creation) is included from `WPEvent::PostType`.
+As the entities share a lot of common structure, part of its functionality (i.e. checking for presence of an entity with given UUID) is included from `WPEvent::PostType`.
 
 To speed up access and bundle common data fetching and querying functionality, a `EntityCache` is implemented in `lib/wp_event/entity_cache`.  This can be used to speed up lookups (e.g. `uuid` to `id`, `uuid` to `name` ...).
 
 In the longer run, all the lookup and low-level access should be moved to the `PostType`, `EntityCache` and possible other modules and classes.
 
 The idea is to keep the entity classes itself lean (in contrast to glue the persistence layer directly to them).
+
+To ease Creation and Handling of Worpdresses Custom Fields for Posts (e.g. starting date of an event is modelled as such), the `PostMetaData` class helps with these.
+
+Finally, to work with 'Featured Image' and thumbnails for posts, `ImageUpload` helps pushing media/attachments to the wordpress installation.
 
 ### Legacy import code
 
