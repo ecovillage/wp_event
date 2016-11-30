@@ -64,8 +64,8 @@ categories.each do |category|
   else
     info "category with uuid #{category['uuid']} not found, creating"
     wp_category = WPEvent::CategoryPost.create category["uuid"],
-                                           category["name"],
-                                           category["description"]
+                                               category["name"],
+                                               category["description"]
   end
 end
 
