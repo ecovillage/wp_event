@@ -31,7 +31,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
   end
-  opts.on("-i", "--image-source=URL", "Where to get images from") do |i|
+  opts.on("-i", "--image-source=URL", "Where to get images from (think about trailing slash!)") do |i|
     options[:image_source] = i
   end
   opts.on("-s", "--image-store=PATH", "Where to store images") do |s|
@@ -67,7 +67,7 @@ elsif ARGV.length == 1
 end
 
 if !options[:outfile]
-  errxit 2, "Need to specify --outfile (or specify as argument)"
+  errxit 2, "Need to specify --outfile (or give as argument)"
 end
 
 if options[:outfile] != '-' && File.exist?(options[:outfile])
