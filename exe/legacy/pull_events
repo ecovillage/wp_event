@@ -103,11 +103,10 @@ if options[:image_store]
   end
 end
 
-def download(url, path)
-  File.open(path, "w") do |f|
-    IO.copy_stream(open(url), f)
-  end
-  info "Downloaded into #{path}"
+image_download = WPEvent::ImageDownload.new options[:image_store], options[:image_source]
+
+if !image_download.ready?
+  warn "Image download options not present, Will not download images."
 end
 
 outfile = io_out_from_arg(options[:outfile])
@@ -119,9 +118,15 @@ if options[:uuid]
     info "event with uuid #{options[:uuid]} not found"
   else
     info "event with uuid #{options[:uuid]} found"
+
+    if !event.image_url.to_s.strip.empty? && image_download.ready?
+      image_download.download! event.image_url
+    end
+
     debug "Original document: #{event.document}"
     outfile << [event].to_json
     debug "Output: #{[event].to_json}"
+    info "Events found and written to #{options[:outfile]}"
   end
 elsif options[:from] && options[:to]
   # Range given
@@ -130,20 +135,8 @@ elsif options[:from] && options[:to]
     info "No matching event found"
   else
     events.each do |event|
-      if !event.image_url.to_s.strip.empty?
-        if !options[:image_source] || !options[:image_store]
-          warn "Image source (--image-source) and/or image store (--image-store) not specified, skipping."
-        else
-          store_path = File.join(options[:image_store], event.image_url)
-          if File.exist?(store_path)
-            info "Image file #{event.image_url} already present in image store"
-          else
-            uri = URI.join(options[:image_source], event.image_url)
-            info "Downloading image file from #{uri}"
-            download(uri, File.join(options[:image_store], event.image_url))
-            debug "Download finished."
-          end
-        end
+      if !event.image_url.to_s.strip.empty? && image_download.ready?
+        image_download.download! event.image_url
       end
     end
 
