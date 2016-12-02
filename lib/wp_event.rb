@@ -7,6 +7,11 @@ require "wp_event/event_post"
 require "wp_event/referee_post"
 require "wp_event/entity_cache"
 
+require "wp_event/cli/logging"
+require "wp_event/cli"
+
+require "wp_event/downloader"
+require "wp_event/image_download"
 require "wp_event/image_upload"
 require "wp_event/image_uploader"
 require "wp_event/media_library_cache"
@@ -16,9 +21,6 @@ require "wp_event/couch_import/couch_event_category"
 require "wp_event/couch_import/couch_db"
 require "wp_event/couch_import/couch_importer"
 require "wp_event/couch_import/couch_referee"
-
-require "wp_event/cli/logging"
-require "wp_event/cli"
 
 require 'ostruct'
 require 'yaml'
