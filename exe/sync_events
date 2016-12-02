@@ -50,7 +50,7 @@ WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 debug "Starting event sync (#{WPEvent::VERSION})"
 
-if ARGV.length != 1 && !STDIN.tty?
+if ARGV.length != 1 && STDIN.tty?
   STDERR.puts "Please provide json input file or pipe into me."
   puts option_parser
   exit 1
@@ -62,12 +62,19 @@ rescue Errno::ENOENT
   errxit 3, "Config file (wp_event.conf) not found."
 end
 
-if !File.exist?(ARGV[0]) && !STDIN.tty
+if (STDIN.tty? && ARGV.length == 1) && !File.exist?(ARGV[0])
   errxit 4, "Input file does not exist!"
 end
 
+#if !STDIN.tty?
+#  ARGV[0] = STDIN
+#end
+
 begin
-  events = JSON.parse IO.read(ARGV[0])
+  # File.read or ARGF
+  input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
+  json = input.read
+  events = JSON.parse json
 rescue JSON::ParserError => e
   debug $!
   errxit 5, "Input file could not be parsed."
