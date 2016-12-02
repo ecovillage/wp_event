@@ -21,6 +21,10 @@ option_parser = OptionParser.new do |opts|
 
   USAGE
 
+  opts.on("-r", "--[no-]ignore-missing-referees", "Do not exit if a associated referee is not found in the wordpress installation") do |r|
+    options[:ignore_missing_referees] = r
+  end
+
   opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
     options[:image_store] = s
   end
@@ -88,7 +92,13 @@ events.each_with_index do |event, idx|
   end
 
   if missing_referee = referee_data.detect {|r| r[:id].nil?}
-    errxit 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
+    if options[:ignore_missing_referees]
+      # TODO list uuid of missing referees, only remove missing ones
+      warn "At least one required referee is missing, but --ignore-missing-referees is set, ignoring ALL referees"
+      referee_data = []
+    else
+      errxit 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
+    end
   end
 
   wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
