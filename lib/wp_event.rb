@@ -51,7 +51,11 @@ module WPEvent
   end
 
   def self.logger
-    @logger ||= Logger.new(STDOUT)
+    @@logger ||= Logger.new(STDOUT)
+  end
+
+  def self.logger= logger
+    @@logger = logger
   end
 
   def self.find_all_posts
