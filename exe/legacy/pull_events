@@ -16,9 +16,9 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
-    Usage: #{$PROGRAM_NAME} [options]
+    Usage: #{$PROGRAM_NAME} [options] JSONFILE
 
-    Write json file with event information.
+    Write json file with event information (use '-' to write to STDOUT).
   USAGE
 
   opts.separator "Filtering options"
@@ -38,7 +38,7 @@ option_parser = OptionParser.new do |opts|
     options[:image_store] = s
   end
   opts.separator "Output options"
-  opts.on("-o", "--outfile FILE", "File to write data (json) to") do |o|
+  opts.on("-o", "--outfile FILE", "File to write data (json) to, '-' for STDOUT") do |o|
     options[:outfile] = o
   end
   opts.separator "Common options"
@@ -60,14 +60,23 @@ option_parser.parse!
 
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
-if !options[:outfile]
-  STDERR.puts "Need to specify --outfile"
-  puts option_parser
-  exit 2
+if ARGV.length == 1 && options[:outfile]
+  errxit 2, "Cannot specify both --outfile and argument"
+elsif ARGV.length == 1
+  options[:outfile] = ARGV[0]
 end
 
-if File.exist?(options[:outfile])
+if !options[:outfile]
+  errxit 2, "Need to specify --outfile (or specify as argument)"
+end
+
+if options[:outfile] != '-' && File.exist?(options[:outfile])
   errxit 3, "Outfile #{options[:outfile]} exists, aborting."
+end
+
+if options[:outfile] == "-"
+  WPEvent.logger = Logger.new(STDERR)
+  WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 end
 
 if options[:from] && options[:to] && options[:uuid]
@@ -101,6 +110,7 @@ def download(url, path)
   info "Downloaded into #{path}"
 end
 
+outfile = io_out_from_arg(options[:outfile])
 
 if options[:uuid]
   # uuid given
@@ -110,7 +120,7 @@ if options[:uuid]
   else
     info "event with uuid #{options[:uuid]} found"
     debug "Original document: #{event.document}"
-    File.open(options[:outfile], 'w') << [event].to_json
+    outfile << [event].to_json
     debug "Output: #{[event].to_json}"
   end
 elsif options[:from] && options[:to]
@@ -137,7 +147,7 @@ elsif options[:from] && options[:to]
       end
     end
 
-    File.open(options[:outfile], 'w') << events.to_json
+    outfile << events.to_json
     debug "Output: #{events.to_json}"
     debug "Original: #{events.map(&:document)}"
   end
