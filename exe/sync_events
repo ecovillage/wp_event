@@ -98,12 +98,21 @@ events.each_with_index do |event, idx|
       qualification: ref_qua["qualification"] }
   end
 
-  if missing_referee = referee_data.detect {|r| r[:id].nil?}
+  missing_referees = (event["referee_qualifications"] || []).select do |ref_qa|
+    referee_cache.id_of_uuid(ref_qa["uuid"]).to_s == ''
+  end
+
+  if !missing_referees.empty?
     if options[:ignore_missing_referees]
-      # TODO list uuid of missing referees, only remove missing ones
-      warn "At least one required referee is missing, but --ignore-missing-referees is set, ignoring ALL referees"
+      warn "At least one required referee is missing, but --ignore-missing-referees is set, ignoring ALL referees:"
+      missing_referees.each do |ref|
+        warn "  #{ref["uuid"]}"
+      end
       referee_data = []
     else
+      missing_referees.each do |ref|
+        warn "Referee missing - UUID: #{ref['uuid']}"
+      end
       exit_with 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
     end
   end
