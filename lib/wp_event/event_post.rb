@@ -64,9 +64,10 @@ module WPEvent
 
       old_metadata  = WPEvent::PostMetaData.new wp_post
 
-      from_date_cf_ids = old_metadata.fields_with_key('fromdate').map &:id
-      to_date_cf_ids = old_metadata.fields_with_key('todate').map &:id
+      from_date_cf_ids = old_metadata.ids_for('fromdate')
+      to_date_cf_ids   = old_metadata.ids_for('todate')
 
+      # Populate 'time' fields
       time_metadata = WPEvent::PostMetaData.new
       time_metadata.add(from_date_cf_ids.first || '',
                         'fromdate',
@@ -74,11 +75,12 @@ module WPEvent
       time_metadata.add(to_date_cf_ids.first || '',
                         'todate',
                         date_range.last.to_time.to_i)
+
       # Delete duplicates:
-      (from_date_cf_ids[1..-1] || []).each do |cf_id|
+      [*from_date_cf_ids[1..-1]].each do |cf_id|
         time_metadata.add cf_id, nil, nil
       end
-      (to_date_cf_ids[1..-1] || []).each do |cf_id|
+      [*to_date_cf_ids[1..-1]].each do |cf_id|
         time_metadata.add cf_id, nil, nil
       end
 
