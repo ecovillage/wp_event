@@ -15,10 +15,16 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of referees with referees registered in wordpress instance
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:)
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, image_url:)
+    Alternatively, will read from STDIN.
     Will exit with 0 on success
 
   USAGE
+
+  opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
+    options[:image_store] = s
+  end
+
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -40,7 +46,7 @@ WPEvent.logger.debug "Starting referee sync (#{WPEvent::VERSION})"
 # Process options
 option_parser.parse!
 
-if ARGV.length != 1
+if ARGV.length != 1 && STDIN.tty?
   STDERR.puts "Please provide json input file."
   puts option_parser
   exit 1
@@ -49,10 +55,17 @@ end
 begin
   WPEvent.load_conf
 rescue Errno::ENOENT
-  errxit 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (wp_event.conf) not found."
 end
 
-referees = JSON.parse File.read(ARGV[0])
+input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
+json = input.read
+
+referees = JSON.parse json
+# nicer parse error display, begin..rescue
+
+media_cache    = WPEvent::MediaLibraryCache.new
+image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
 referees.each_with_index do |referee, idx|
   # Check one by one, because we need to check if we have to update.
@@ -62,9 +75,11 @@ referees.each_with_index do |referee, idx|
     info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} found"
   else
     info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} not found, creating"
+    attachment_id = image_uploader.process referee['image_url']
     wp_referee = WPEvent::RefereePost.create referee["uuid"],
                                              referee["name"],
-                                             referee["description"]
+                                             referee["description"],
+                                             attachment_id
   end
 end
 
