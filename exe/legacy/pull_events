@@ -61,17 +61,17 @@ option_parser.parse!
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 if ARGV.length == 1 && options[:outfile]
-  errxit 2, "Cannot specify both --outfile and argument"
+  exit_with 2, "Cannot specify both --outfile and argument"
 elsif ARGV.length == 1
   options[:outfile] = ARGV[0]
 end
 
 if !options[:outfile]
-  errxit 2, "Need to specify --outfile (or give as argument)"
+  exit_with 2, "Need to specify --outfile (or give as argument)"
 end
 
 if options[:outfile] != '-' && File.exist?(options[:outfile])
-  errxit 3, "Outfile #{options[:outfile]} exists, aborting."
+  exit_with 3, "Outfile #{options[:outfile]} exists, aborting."
 end
 
 if options[:outfile] == "-"
@@ -80,11 +80,11 @@ if options[:outfile] == "-"
 end
 
 if options[:from] && options[:to] && options[:uuid]
-  errxit 2, "Cannot specify --from, --to AND --uuid, aborting."
+  exit_with 2, "Cannot specify --from, --to AND --uuid, aborting."
 end
 
 if !!options[:from] != !!options[:to]
-  errxit 2, "Have to specify --from when --to is specified (and vice versa)."
+  exit_with 2, "Have to specify --from when --to is specified (and vice versa)."
 end
 
 if !options[:from] && !options[:to] && !options[:uuid]
@@ -99,7 +99,7 @@ if options[:image_store]
     info "Created image store directory #{options[:image_store]}"
   rescue Exception => e
     debug "Image store could not be created: #{$@}"
-    errxit 7, "Image store could not be created: #{$!}"
+    exit_with 7, "Image store could not be created: #{$!}"
   end
 end
 
@@ -146,7 +146,7 @@ elsif options[:from] && options[:to]
   end
   info "#{events.count} events found and written to #{options[:outfile]}"
 else
-  errxit 5, "No simple default behaviour specified"
+  exit_with 5, "No simple default behaviour specified"
 end
 
 exit 0

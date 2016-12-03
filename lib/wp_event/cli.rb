@@ -4,7 +4,7 @@ module WPEvent
 
     # Logger#error and STDERR.puts given error message
     # and exits with exit_code
-    def errxit exit_code=1, msg
+    def exit_with exit_code=1, msg
       STDERR.puts msg
       error msg
       exit exit_code

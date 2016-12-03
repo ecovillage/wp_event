@@ -109,7 +109,7 @@ if options[:uuid]
     category_ids = category_cache.id_of_names options[:categories]
 
     if category_ids.include?(nil)
-      errxit 7, "Some categories do not yet exist, aborting."
+      exit_with 7, "Some categories do not yet exist, aborting."
     else
       info "All categories found"
       debug "category ids: #{category_ids.join('\n')}"
@@ -140,7 +140,7 @@ else
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   else
-    errxit 4, "Cannot deal with updates only atm"
+    exit_with 4, "Cannot deal with updates only atm"
   end
 end
 

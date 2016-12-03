@@ -86,7 +86,7 @@ if options[:uuid]
   referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
   if options[:export]
     if !referee
-      errxit 4, "Referee not found"
+      exit_with 4, "Referee not found"
     end
     STDOUT.puts JSON.pretty_generate(referee)
     exit 0

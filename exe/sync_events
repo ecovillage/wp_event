@@ -59,11 +59,11 @@ end
 begin
   WPEvent.load_conf
 rescue Errno::ENOENT
-  errxit 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (wp_event.conf) not found."
 end
 
 if (STDIN.tty? && ARGV.length == 1) && !File.exist?(ARGV[0])
-  errxit 4, "Input file does not exist!"
+  exit_with 4, "Input file does not exist!"
 end
 
 #if !STDIN.tty?
@@ -77,7 +77,7 @@ begin
   events = JSON.parse json
 rescue JSON::ParserError => e
   debug $!
-  errxit 5, "Input file could not be parsed."
+  exit_with 5, "Input file could not be parsed."
 end
 
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
@@ -89,7 +89,7 @@ events.each_with_index do |event, idx|
   # Fetch and memoize category ids.
   category_ids = category_cache.id_of_names event["category_names"]
   if category_ids.include?(nil)
-    errxit 7, "A required category does not exist, aborting."
+    exit_with 7, "A required category does not exist, aborting."
   end
 
   # from {uuid: 1, q: '2'} we need {id: 123, q: '2'}
@@ -104,7 +104,7 @@ events.each_with_index do |event, idx|
       warn "At least one required referee is missing, but --ignore-missing-referees is set, ignoring ALL referees"
       referee_data = []
     else
-      errxit 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
+      exit_with 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
     end
   end
 
