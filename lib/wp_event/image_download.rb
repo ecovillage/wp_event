@@ -8,6 +8,11 @@ module WPEvent
     def initialize image_store, image_source
       @image_source = image_source
       @image_store  = image_store
+      # We will URI.join later, which will treat non trailing-slash
+      # URLs as non-paths.
+      if @image_source && !@image_source.empty? && @image_source[-1] != '/'
+        @image_source += '/'
+      end
     end
 
     def download! rel_path
