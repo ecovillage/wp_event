@@ -62,12 +62,32 @@ module WPEvent
 
       referee_hashes = referee_qualification_updates(wp_post, referee_qualifications)
 
+      old_metadata  = WPEvent::PostMetaData.new wp_post
+
+      from_date_cf_ids = old_metadata.fields_with_key('fromdate').map &:id
+      to_date_cf_ids = old_metadata.fields_with_key('todate').map &:id
+
+      time_metadata = WPEvent::PostMetaData.new
+      time_metadata.add(from_date_cf_ids.first || '',
+                        'fromdate',
+                        date_range.first.to_time.to_i)
+      time_metadata.add(to_date_cf_ids.first || '',
+                        'todate',
+                        date_range.last.to_time.to_i)
+      # Delete duplicates:
+      (from_date_cf_ids[1..-1] || []).each do |cf_id|
+        time_metadata.add cf_id, nil, nil
+      end
+      (to_date_cf_ids[1..-1] || []).each do |cf_id|
+        time_metadata.add cf_id, nil, nil
+      end
+
       content = {
-        post_title:   name,
-        post_content: text,
-        custom_fields: referee_hashes | category_updates(wp_post, category_ids) | [
-                      { key: "fromdate", value: date_range.first.to_time.to_i },
-                      { key: "todate",   value: date_range.last.to_time.to_i }]
+        post_title:    name,
+        post_content:  text,
+        custom_fields: referee_hashes |
+                       category_updates(wp_post, category_ids) |
+                       time_metadata.to_custom_fields_hash
       }
 
       # Filename: old_image_url = wp_post.dig("post_thumbnail", "link")
