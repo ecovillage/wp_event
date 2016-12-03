@@ -40,8 +40,32 @@ module WPEvent
       @fields.first {|f| f.key == field_key}&.id
     end
 
+    # Return array of field ids for fields with given key
+    def ids_for field_key
+      fields_with_key(key).map &:id
+    end
+
     def fields_with_key_regex key_regex
       @fields.select {|f| f.key =~ key_regex}
+    end
+
+    # Returns field with given id (nil if none found)
+    def field_for id
+      @fields.first {|f| f.id == id}
+    end
+
+    # Returns field with given id (create new if none found)
+    # if none found, the given field is initialized with nil
+    # values such that it will be 'deleted' if not populated.
+    def field_or_create_for id
+      field_for(id) || add(id, nil, nil)
+    end
+
+    # Mark field with given id for deletion by setting key, value to nil
+    def mark_for_deletion! field_id
+      field = field_or_create_for(field_id)
+      field.values = nil
+      field.key    = nil
     end
 
     # merges second metadata into self.
@@ -52,14 +76,14 @@ module WPEvent
         if f = field_with_key_value(field.key, field.value)
           if f.id
             # Get rid of an encountered duplicate (will delete for empty values)
-            add field.id, nil, nil
+            mark_for_deletion! field.id
           else
             # Set the id (change fields value)
             f.id = field.id
           end
         else
           # No entry for this ref yet, delete it!
-          add field.id, nil, nil
+          mark_for_deletion! field.id
         end
       end
     end
@@ -67,9 +91,9 @@ module WPEvent
     def to_custom_fields_hash
       result = @fields.map do |field|
         hsh = {}
-        hsh['key']   = field.key if field.key
+        hsh['key']   = field.key   if field.key
         hsh['value'] = field.value if field.value
-        hsh['id']    = field.id if field.id
+        hsh['id']    = field.id    if field.id
         hsh
       end
     end
