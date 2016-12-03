@@ -18,7 +18,8 @@ option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
     Usage: #{$PROGRAM_NAME} [options] JSONFILE
 
-    Write json file with event information (use '-' to write to STDOUT).
+    Write json file with event information (omit JSONFILE and do not specify '--outfile' to write to STDOUT).
+    You can use the '--outfile' option to specify where the output shall be written to.  The advantage of the latter option is that #{PROGRAM_NAME} will fail if the file already exist (which will not happen when using redirection with `>`).
   USAGE
 
   opts.separator "Filtering options"
