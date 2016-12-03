@@ -42,7 +42,7 @@ module WPEvent
 
     # Return array of field ids for fields with given key
     def ids_for field_key
-      fields_with_key(key).map &:id
+      fields_with_key(field_key).map &:id
     end
 
     def fields_with_key_regex key_regex
@@ -64,7 +64,7 @@ module WPEvent
     # Mark field with given id for deletion by setting key, value to nil
     def mark_for_deletion! field_id
       field = field_or_create_for(field_id)
-      field.values = nil
+      field.value  = nil
       field.key    = nil
     end
 
