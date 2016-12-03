@@ -137,6 +137,10 @@ As long as you can export your data from the legacy database into the json forma
 
 For Sieben Linden legacy data, export functionality of it is shipped within this gem (with most code residing in `lib/wp_event/couch_import` and `exe/legacy`).
 
+The tools should work hand in hand with the `sync` family of tools, such that you can connect them via pipes:
+
+    $ bundle exec exe/legacy/pull_events --outfile - | bundle exec exe/sync_events
+
 The generated JSON files can then be used to update the data found in the wordpress installation.
 
 ## Wordpress setup
