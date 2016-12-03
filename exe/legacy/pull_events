@@ -11,15 +11,16 @@ require "open-uri"
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
+extend WPEvent::CLI::Tool
 
 options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
-    Usage: #{$PROGRAM_NAME} [options] JSONFILE
+    Usage: #{$PROGRAM_NAME} [options] [JSONFILE]
 
     Write json file with event information (omit JSONFILE and do not specify '--outfile' to write to STDOUT).
-    You can use the '--outfile' option to specify where the output shall be written to.  The advantage of the latter option is that #{PROGRAM_NAME} will fail if the file already exist (which will not happen when using redirection with `>`).
+    You can use the '--outfile' option to specify where the output shall be written to.  The advantage of the latter option is that #{$PROGRAM_NAME} will fail if the file already exist (which will not happen when using redirection with `>`).
   USAGE
 
   opts.separator "Filtering options"
@@ -38,10 +39,15 @@ option_parser = OptionParser.new do |opts|
   opts.on("-s", "--image-store=PATH", "Where to store images") do |s|
     options[:image_store] = s
   end
+
   opts.separator "Output options"
-  opts.on("-o", "--outfile FILE", "File to write data (json) to, '-' for STDOUT") do |o|
+  opts.on("-o", "--outfile FILE", "File to write data (json) to, fails if file exists, omit this option and the JSONFILE argument to write to STDOUT") do |o|
     options[:outfile] = o
   end
+  opts.on("-p", "--pretty-print", "Pretty print the generated json data") do |p|
+    options[:pretty_print] = p
+  end
+
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -59,26 +65,15 @@ end
 # Process options
 option_parser.parse!
 
+# TODO this creates file before its used. frustration on errors (because then empty file is created)
+outstream = exit_or_get_out_stream ARGV, options
+
+if !outstream.is_a?(File)
+  WPEvent.logger = Logger.new(STDERR)
+end
+
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
-if ARGV.length == 1 && options[:outfile]
-  exit_with 2, "Cannot specify both --outfile and argument"
-elsif ARGV.length == 1
-  options[:outfile] = ARGV[0]
-end
-
-if !options[:outfile]
-  exit_with 2, "Need to specify --outfile (or give as argument)"
-end
-
-if options[:outfile] != '-' && File.exist?(options[:outfile])
-  exit_with 3, "Outfile #{options[:outfile]} exists, aborting."
-end
-
-if options[:outfile] == "-"
-  WPEvent.logger = Logger.new(STDERR)
-  WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
-end
 
 if options[:from] && options[:to] && options[:uuid]
   exit_with 2, "Cannot specify --from, --to AND --uuid, aborting."
@@ -110,8 +105,6 @@ if !image_download.ready?
   warn "Image download options not present, Will not download images."
 end
 
-outfile = io_out_from_arg(options[:outfile])
-
 if options[:uuid]
   # uuid given
   event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
@@ -125,9 +118,15 @@ if options[:uuid]
     end
 
     debug "Original document: #{event.document}"
-    outfile << [event].to_json
+    if options[:pretty_print]
+      outstream << JSON.pretty_generate([event].to_json)
+    else
+      outstream << [event].to_json
+    end
     debug "Output: #{[event].to_json}"
-    info "Events found and written to #{options[:outfile]}"
+    if outstream.is_a? File
+      info "Events found and written to #{outstream.path}"
+    end
   end
 elsif options[:from] && options[:to]
   # Range given
@@ -141,11 +140,21 @@ elsif options[:from] && options[:to]
       end
     end
 
-    outfile << events.to_json
+    if options[:pretty_print]
+      outstream << JSON.pretty_generate(events)
+    else
+      outstream << events.to_json
+    end
+
     debug "Output: #{events.to_json}"
     debug "Original: #{events.map(&:document)}"
   end
-  info "#{events.count} events found and written to #{options[:outfile]}"
+  if outstream.is_a? File
+    info "#{events.count} events found and written to #{options[:outfile]}"
+  else
+    info "#{events.count} events found and written to STDOUT"
+  end
+
 else
   exit_with 5, "No simple default behaviour specified"
 end
