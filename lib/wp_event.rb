@@ -9,6 +9,7 @@ require "wp_event/entity_cache"
 
 require "wp_event/cli/logging"
 require "wp_event/cli"
+require "wp_event/cli/tool"
 
 require "wp_event/downloader"
 require "wp_event/image_download"
