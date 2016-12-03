@@ -10,13 +10,6 @@ module WPEvent
       exit exit_code
     end
 
-    # Either opens file with given name or return STDOUT, when '-' is given.
-    def io_out_from_arg outfile
-      if outfile == '-'
-        $stdout
-      else
-        File.open(outfile, 'w')
-      end
-    end
+
   end
 end
