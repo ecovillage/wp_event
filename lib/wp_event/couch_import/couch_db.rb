@@ -14,8 +14,8 @@ module WPEvent
       # considered smelly legacy shortcut.
       def self.get_seminar_docs_by_date from, to
         url = BASE_URL + "_design/sl_seminar/_view/seminar_by_date"
-        url = url + "?startkey=#{URI::encode([from.year.to_s, from.month.to_s, from.day.to_s].to_json)}"
-        url = url + "&endkey=#{URI::encode([to.year.to_s, to.month.to_s, to.day.to_s].to_json)}"
+        url = url + "?startkey=#{URI::encode([from.year.to_s, "%.2d" % from.month.to_s, "%.2d" % from.day.to_s].to_json)}"
+        url = url + "&endkey=#{URI::encode([to.year.to_s, "%.2d" % to.month.to_s, "%.2d" % to.day.to_s].to_json)}"
         # Fetch the docs, one by one.
         rows = JSON.parse(RestClient.get(url))["rows"]
         rows.map{|r| get_doc r["id"]}
