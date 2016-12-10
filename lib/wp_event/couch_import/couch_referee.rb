@@ -33,7 +33,7 @@ module WPEvent
       def self.from_couch_doc document
         WPEvent::CouchImport::CouchReferee.new document["_id"],
           document.dig("g_value", "firstname").to_s + " " + document.dig("g_value", "lastname").to_s,
-          document.dig("g_value", "description"),
+          document.dig("g_value", "referee_description"),
           document,
           document.dig("g_value", "image")
       end
