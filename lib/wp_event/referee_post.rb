@@ -33,5 +33,33 @@ module WPEvent
       WPEvent::wp.newPost(blog_id: 0,
                           content: content)
     end
+
+    def self.update wp_post, firstname, lastname, text, featured_image_id=nil
+      if text.nil?
+        WPEvent.logger.warn "Description of referee (#{uuid}) is nil! Setting to empty value."
+        text = ""
+      end
+
+      # Name change not yet supported
+      metadata      = WPEvent::PostMetaData.new wp_post: wp_post
+      metadata.update_or_create "firstname", firstname
+      metadata.update_or_create "lastname",  lastname
+      puts metadata.to_yaml
+
+      content = { post_content: text || "",
+                  post_title:   "#{firstname} #{lastname}",
+                  custom_fields: metadata.to_custom_fields_hash
+      }
+
+      old_attachment_id = wp_post['post_thumbnail'].to_h["attachment_id"]
+
+      if old_attachment_id.to_s != featured_image_id.to_s
+        content["post_thumbnail"] = featured_image_id.to_s
+      end
+
+      WPEvent::wp.editPost(blog_id: 0,
+                           post_id: wp_post['post_id'],
+                           content: content)
+    end
   end
 end
