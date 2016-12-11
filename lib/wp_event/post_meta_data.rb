@@ -64,6 +64,11 @@ module WPEvent
       field_for(id) || add(id, nil, nil)
     end
 
+    def update_or_create key, value
+      field = fields_with_key(key).first
+      (field || add(nil, key, value)).value = value
+    end
+
     # Mark field with given id for deletion by setting key, value to nil
     def mark_for_deletion! field_id
       field = field_or_create_for(field_id)
