@@ -4,9 +4,12 @@ module WPEvent
   class PostMetaData
     attr_accessor :fields
 
-    def initialize wp_post=nil
+    def initialize wp_post=nil, **kvargs
       @fields = (wp_post&.fetch('custom_fields') || []).map do |cf|
         CustomField.new cf['id'], cf['key'], cf['value']
+      end
+      kvargs.each do |k,v|
+        add nil, k, v
       end
     end
 
