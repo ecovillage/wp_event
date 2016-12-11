@@ -66,6 +66,7 @@ module WPEvent
       field_for(id) || add(id, nil, nil)
     end
 
+    # Update or create given field (identified by key)
     def update_or_create key, value
       field = fields_with_key(key).first
       (field || add(nil, key, value)).value = value
