@@ -13,9 +13,11 @@ module WPEvent
       end
     end
 
-    # Add a custom field
+    # Add and return a custom field
     def add id, key, value
-      @fields << CustomField.new(id, key, value)
+      new_field = CustomField.new(id, key, value)
+      @fields << new_field
+      new_field
     end
 
     # true iff multiple values for key found
