@@ -23,8 +23,11 @@ option_parser = OptionParser.new do |opts|
   opts.on("--image-file PATH", "Path to image file") do |i|
     options[:image_file] = i
   end
-  opts.on("-n", "--name NAME", "Name ('title') of the referee") do |n|
-    options[:name] = n
+  opts.on("-f", "--firstname FIRSTNAME", "First Name (part of 'title') of the referee") do |f|
+    options[:firstname] = f
+  end
+  opts.on("-n", "--lastname LASTNAME", "Last Name (part of 'title') of the referee") do |n|
+    options[:lastname] = n
   end
   opts.on("-d", "--description DESCRIPTION", "Description of the referee") do |d|
     options[:description] = d
@@ -92,8 +95,8 @@ if options[:uuid]
     exit 0
   end
 
-  if !referee && (!options[:name] || !options[:description])
-    STDERR.puts "Need to specify --name and --description to create a referee."
+  if !referee && (!(options[:firstname] && options[:lastname]) || !options[:description])
+    STDERR.puts "Need to specify --firstname, --lastname and --description to create a referee."
     exit 6
   end
 
@@ -106,7 +109,8 @@ if options[:uuid]
     end
 
     referee = WPEvent::RefereePost.create options[:uuid],
-                                        options[:name],
+                                        options[:firstname],
+                                        options[:lastname],
                                         options[:description],
                                         attachment_id || nil
 

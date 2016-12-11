@@ -120,12 +120,15 @@ Consumes a JSON file with referee information like this
 
     [
       {
-        "uuid": "1a3b-1234-abcd-defa",
-        "name": "Hannah Barber",
+        "uuid":        "1a3b-1234-abcd-defa",
+        "firstname":   "Hannah",
+        "lastname":    "Barber",
+        "description": "Cutting edge referee",
       },
       {
-        "uuid": "a123-a234-abcd-def1",
-        "name": "Josh Conceptual",
+        "uuid":      "a123-a234-abcd-def1",
+        "firstname": "Josh",
+        "lastname":  "Conceptual",
       }
     ]
 

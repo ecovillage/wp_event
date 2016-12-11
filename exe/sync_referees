@@ -15,7 +15,7 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of referees with referees registered in wordpress instance
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, image_url:)
+    FILE is supposed to be a json array of hashes (uuid:, firstname:, lastname:, description:, image_url:)
     Alternatively, will read from STDIN.
     Will exit with 0 on success
 
@@ -77,7 +77,8 @@ referees.each_with_index do |referee, idx|
     info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} not found, creating"
     attachment_id = image_uploader.process referee['image_url']
     wp_referee = WPEvent::RefereePost.create referee["uuid"],
-                                             referee["name"],
+                                             referee["firstname"],
+                                             referee["lastname"],
                                              referee["description"],
                                              attachment_id
   end

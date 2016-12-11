@@ -3,11 +3,12 @@ require 'json'
 module WPEvent
   module CouchImport
     class CouchReferee
-      attr_accessor :name, :description, :uuid, :document, :image_url
+      attr_accessor :firstname, :lastname, :description, :uuid, :document, :image_url
 
-      def initialize uuid, name, description, document=nil, image_url=nil
+      def initialize uuid, firstname, lastname, description, document=nil, image_url=nil
         @uuid        = uuid
-        @name        = name
+        @firstname   = firstname
+        @lastname    = lastname
         @description = description
         @document    = document
         @image_url   = image_url
@@ -24,7 +25,8 @@ module WPEvent
 
       def to_json *a
         { uuid:        @uuid,
-          name:        @name,
+          firstname:   @firstname,
+          lastname:    @lastname,
           description: @description,
           image_url:   @image_url
         }.to_json(*a)
@@ -32,7 +34,8 @@ module WPEvent
 
       def self.from_couch_doc document
         WPEvent::CouchImport::CouchReferee.new document["_id"],
-          document.dig("g_value", "firstname").to_s + " " + document.dig("g_value", "lastname").to_s,
+          document.dig("g_value", "firstname").to_s,
+          document.dig("g_value", "lastname").to_s,
           document.dig("g_value", "referee_description"),
           document,
           document.dig("g_value", "image")
