@@ -102,9 +102,9 @@ module WPEvent
     def to_custom_fields_hash
       result = @fields.map do |field|
         hsh = {}
-        hsh['key']   = field.key   if field.key
-        hsh['value'] = field.value if field.value
-        hsh['id']    = field.id    if field.id
+        hsh['key']   = field.key.to_s   if field.key
+        hsh['value'] = field.value.to_s if field.value
+        hsh['id']    = field.id         if field.id
         hsh
       end
     end
