@@ -18,6 +18,13 @@ option_parser = OptionParser.new do |opts|
 
   USAGE
 
+  opts.on("-i", "--image-source=URL", "Where to get images from (think about trailing slash!)") do |i|
+    options[:image_source] = i
+  end
+  opts.on("-s", "--image-store=PATH", "Where to store images") do |s|
+    options[:image_store] = s
+  end
+
   opts.separator "Filtering options"
   opts.on("-u", "--uuid UUID", "Event Categories UUID") do |u|
     options[:uuid] = u
