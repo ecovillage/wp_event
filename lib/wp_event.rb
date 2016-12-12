@@ -63,6 +63,10 @@ module WPEvent
     wp.getPosts(blog_id: 0, filter: {post_type: Event::TYPE})
   end
 
+  def self.delete_post post_id
+    wp.deletePost(blog_id: 0, post_id: post_id)
+  end
+
   def self.wp
     @wp ||= Rubypress::Client.new(host: config.host,
                                   username: config.username,
