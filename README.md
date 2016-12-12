@@ -80,7 +80,8 @@ Consumes a JSON file with event categories like this
       {
         "uuid": "1234-1234-abcd-defa",
         "name": "numbers",
-        "description": "Numeric events"
+        "description": "Numeric events",
+        "image_url":   "numers-category.png"
       },
       {
         "uuid": "dead-beef-abcd-defa",
@@ -93,7 +94,7 @@ and change corresponding data (identified by the UUID) in the wordpress instance
 
 ### sync_events
 
-Consumes a JSON file with event categories like this
+Consumes a JSON file with events like this
 
     [
       {
@@ -101,7 +102,8 @@ Consumes a JSON file with event categories like this
         "name": "Counting for accountants",
         "description": "advanced calculator needed",
         "fromdate": "2016-11-11 11:00",
-        "todate": "2016-11-13 13:00"
+        "todate": "2016-11-13 13:00",
+        "image_url": "accountants-event.png"
       },
       {
         "uuid": "a123-a234-abcd-def1",
@@ -124,6 +126,7 @@ Consumes a JSON file with referee information like this
         "firstname":   "Hannah",
         "lastname":    "Barber",
         "description": "Cutting edge referee",
+        "image_url":   "hanna_barber.png",
       },
       {
         "uuid":      "a123-a234-abcd-def1",
