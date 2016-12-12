@@ -13,7 +13,8 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-  opts.separator "The standard: Create or update a referee with ..."
+  opts.separator "The standard: Create, update or delete a referee with ..."
+
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
     options[:uuid] = u
   end
@@ -33,8 +34,11 @@ option_parser = OptionParser.new do |opts|
     options[:description] = d
   end
   opts.separator "Other actions (than create or update)"
-  opts.on("-l", "--list", "List categories") do |l|
+  opts.on("-l", "--list", "List referees") do |l|
     options[:list] = l
+  end
+  opts.on("-r", "--delete", "Delete given referee") do |d|
+    options[:delete] = d
   end
   opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
     options[:export] = x
@@ -62,6 +66,10 @@ if !options[:id] && !options[:uuid] && !options[:list]
   STDERR.puts "Please provide at least the referees (uu)id or specify the list action."
   puts option_parser
   exit 1
+end
+
+if options[:delete] && !options[:uuid] && !options[:id]
+  exit_with 3, "Need to specify referee to delete (by --uuid or --id)."
 end
 
 if options[:id] && options[:uuid]
@@ -95,6 +103,18 @@ if options[:uuid]
     exit 0
   end
 
+  if options[:delete]
+    referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
+    if !referee
+      exit_with 3, "Referee not found"
+    end
+    if deletion=WPEvent.delete_post(referee['post_id'])
+      info "Referee deleted"
+    else
+      info "Referee not deleted"
+    end
+  end
+
   if !referee && (!(options[:firstname] && options[:lastname]) || !options[:description])
     STDERR.puts "Need to specify --firstname, --lastname and --description to create a referee."
     exit 6
@@ -109,10 +129,10 @@ if options[:uuid]
     end
 
     referee = WPEvent::RefereePost.create options[:uuid],
-                                        options[:firstname],
-                                        options[:lastname],
-                                        options[:description],
-                                        attachment_id || nil
+                                          options[:firstname],
+                                          options[:lastname],
+                                          options[:description],
+                                          attachment_id || nil
 
     info "referee created (#{referee})"
     post_id = referee
