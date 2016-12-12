@@ -7,9 +7,9 @@ module WPEvent
 
     def initialize image_store, media_cache
       if !image_store
-        WPEvent.logger.warn "ImageUploader will search media in current directory (no source specified)."
+        WPEvent.logger.warn "ImageUploader will not uploading anything (no image store specified)."
       end
-      @image_store = image_store || '.'
+      @image_store = image_store
       @media_cache = media_cache
     end
 
@@ -18,6 +18,7 @@ module WPEvent
     # (or nil if path empty)
     def process rel_path, wp_event=nil
       return nil if rel_path.to_s.strip.empty?
+      return nil if @image_store.nil?
 
       # Do we need URI encoding here?
       if attachment_id = @media_cache.id_of_name(rel_path)

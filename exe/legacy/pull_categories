@@ -62,6 +62,11 @@ end
 
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
+image_download = WPEvent::ImageDownload.new options[:image_store],
+  options[:image_source]
+
+image_download.prepare!
+
 if options[:uuid]
   # uuid given
   category = WPEvent::CouchImport::CouchEventCategory.pull_from_couchdb options[:uuid]
@@ -71,6 +76,11 @@ if options[:uuid]
     info "event category with uuid #{options[:uuid]} found"
     debug "Output: #{[category].to_json}"
     debug "Original document: #{category.document}"
+
+    if !category.image_url.to_s.strip.empty? && image_download.ready?
+      image_download.download! category.image_url
+    end
+
     if options[:pretty_print]
       outstream << JSON.pretty_generate([category])
     else
@@ -84,6 +94,11 @@ else
   if categories.nil? || categories.empty?
     exit_with 5, "No event categories found!"
   else
+    categories.each do |category|
+      if !category.image_url.to_s.strip.empty? && image_download.ready?
+        image_download.download! category.image_url
+      end
+    end
     info "#{categories.length} categories found."
     if options[:pretty_print]
       outstream << JSON.pretty_generate(categories)

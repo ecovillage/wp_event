@@ -1,6 +1,7 @@
 module WPEvent
   class ImageDownload
     include WPEvent::CLI::Logging
+    include WPEvent::CLI
 
     attr_accessor :image_store
     attr_accessor :image_source
@@ -30,6 +31,21 @@ module WPEvent
 
     def ready?
       return !@image_source.nil? && !@image_store.nil?
+    end
+
+    # Creates image store directory, exits if fail.
+    def prepare!
+      if !ready?
+        warn "Image download options not present, Will not download images."
+      else
+        begin
+          FileUtils::mkdir_p(@image_store)
+          info "Created image store directory #{@image_store}"
+        rescue Exception => e
+          debug "Image store could not be created: #{$@}"
+          exit_with 7, "Image store could not be created: #{$!}"
+        end
+      end
     end
   end
 end

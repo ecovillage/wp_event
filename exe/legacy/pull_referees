@@ -74,9 +74,7 @@ end
 
 image_download = WPEvent::ImageDownload.new options[:image_store], options[:image_source]
 
-if !image_download.ready?
-  warn "Image download options not present, Will not download images."
-end
+image_download.prepare!
 
 if options[:uuid]
   # uuid given

@@ -89,21 +89,8 @@ if !options[:from] && !options[:to] && !options[:uuid]
   options[:to]   = Date.civil(options[:from].year, 12, 31)
 end
 
-if options[:image_store]
-  begin
-    FileUtils::mkdir_p(options[:image_store])
-    info "Created image store directory #{options[:image_store]}"
-  rescue Exception => e
-    debug "Image store could not be created: #{$@}"
-    exit_with 7, "Image store could not be created: #{$!}"
-  end
-end
-
 image_download = WPEvent::ImageDownload.new options[:image_store], options[:image_source]
-
-if !image_download.ready?
-  warn "Image download options not present, Will not download images."
-end
+image_download.prepare!
 
 if options[:uuid]
   # uuid given
