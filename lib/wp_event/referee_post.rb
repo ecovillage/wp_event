@@ -41,7 +41,7 @@ module WPEvent
       end
 
       # Name change not yet supported
-      metadata      = WPEvent::PostMetaData.new wp_post: wp_post
+      metadata = WPEvent::PostMetaData.new wp_post: wp_post
       metadata.update_or_create "firstname", firstname
       metadata.update_or_create "lastname",  lastname
       puts metadata.to_yaml

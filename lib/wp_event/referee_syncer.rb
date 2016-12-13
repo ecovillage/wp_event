@@ -33,11 +33,7 @@ module WPEvent
       # if wp_referee
       #   info "Referee with UUID #{referee['uuid']} found."
       #   if is_newer?
-      # else
-      #   check if update
-      #   info ...
       # end
-      #return what
       # when and where to check modification date
       # when and where to delete when not in whitelist
     end
