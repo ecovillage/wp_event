@@ -17,6 +17,9 @@ require "wp_event/image_upload"
 require "wp_event/image_uploader"
 require "wp_event/media_library_cache"
 
+require "wp_event/referee_syncer"
+require "wp_event/event_syncer"
+
 require "wp_event/couch_import/couch_event"
 require "wp_event/couch_import/couch_event_category"
 require "wp_event/couch_import/couch_db"

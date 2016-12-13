@@ -67,27 +67,15 @@ referees = JSON.parse json
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
+syncer = WPEvent::RefereeSyncer.new media_cache, image_uploader
+
 referees.each_with_index do |referee, idx|
-  # Check one by one, because we need to check if we have to update.
-  # Otherwise, an EntityCache could be used.
+
   wp_referee = WPEvent::RefereePost.uuid_in_wordpress? referee["uuid"]
-  if wp_referee
-    info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} found, updating"
-    attachment_id = image_uploader.process referee['image_url']
-    WPEvent::RefereePost.update wp_referee,
-                                referee["firstname"],
-                                referee["lastname"],
-                                referee["description"],
-                                attachment_id
-  else
-    info "(#{idx + 1}/#{referees.length}): referee with uuid #{referee['uuid']} not found, creating"
-    attachment_id = image_uploader.process referee['image_url']
-    wp_referee = WPEvent::RefereePost.create referee["uuid"],
-                                             referee["firstname"],
-                                             referee["lastname"],
-                                             referee["description"],
-                                             attachment_id
-  end
+
+  info "(#{idx + 1}/#{referees.length}): Processing referee with uuid #{referee['uuid']}"
+  syncer.create_or_update wp_referee, referee
+
 end
 
 exit 0

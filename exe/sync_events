@@ -85,67 +85,20 @@ referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
+syncer = WPEvent::EventSyncer.new category_cache,
+  referee_cache, media_cache, image_uploader, raise_on_missing_referee: !options[:ignore_missing_referees]
+
 events.each_with_index do |event, idx|
-  # Fetch and memoize category ids.
-  category_ids = category_cache.id_of_names event["category_names"]
-  if category_ids.include?(nil)
+  info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{event['uuid']}"
+  begin
+    wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
+    syncer.create_or_update(wp_event, event)
+  rescue WPEvent::MissingCategoryError => e
     exit_with 7, "A required category does not exist, aborting."
-  end
-
-  # from {uuid: 1, q: '2'} we need {id: 123, q: '2'}
-  referee_data = (event["referee_qualifications"] || []).map do |ref_qua|
-    { id: referee_cache.id_of_uuid(ref_qua["uuid"]),
-      qualification: ref_qua["qualification"] }
-  end
-
-  missing_referees = (event["referee_qualifications"] || []).select do |ref_qa|
-    referee_cache.id_of_uuid(ref_qa["uuid"]).to_s == ''
-  end
-
-  if !missing_referees.empty?
-    if options[:ignore_missing_referees]
-      warn "At least one required referee is missing, but --ignore-missing-referees is set, ignoring ALL referees:"
-      missing_referees.each do |ref|
-        warn "  #{ref["uuid"]}"
-      end
-      referee_data = []
-    else
-      missing_referees.each do |ref|
-        warn "Referee missing - UUID: #{ref['uuid']}"
-      end
-      exit_with 8, "A required referee (in #{event['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
-    end
-  end
-
-  wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
-  if wp_event
-    # Exists, update
-    post_id = wp_event['post_id']
-    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} (WP-ID #{post_id}) found, updating"
-
-    attachment_id = image_uploader.process event['image_url']
-
-    WPEvent::EventPost.update wp_event,
-                              event["name"],
-                              DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
-                              event["description"],
-                              category_ids,
-                              referee_data,
-                              attachment_id
-
-  else
-    # New, create
-    info "(#{idx + 1}/#{events.length}) event with uuid #{event['uuid']} not found, creating"
-    attachment_id = image_uploader.process event['image_url']
-
-    wp_event = WPEvent::EventPost.create event["uuid"],
-                                         event["name"],
-                                         DateTime.parse(event["fromdate"])..DateTime.parse(event["todate"]),
-                                         event["description"],
-                                         category_ids,
-                                         referee_data,
-                                         attachment_id
-    debug "created: #{wp_event}"
+  rescue WPEvent::MissingRefereeError => e
+    # More info: ..
+    #exit_with 8, "A required referee (in #{event_json['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
+    exit_with 8, "A required referee (in #{e.missing_referees.map{|r| r["uuid"]}}) does not exist, aborting."
   end
 end
 
