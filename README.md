@@ -58,7 +58,7 @@ An example usage might look like
 
 #### export an event
 
-`wp_event --export -id 2`
+`wp_event --export --id 2`
 
 ### wp_category
 
