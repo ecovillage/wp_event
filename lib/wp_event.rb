@@ -1,5 +1,7 @@
 require "wp_event/version"
 
+require "wp_event/lambdas"
+
 require "wp_event/post_type"
 require "wp_event/post_meta_data"
 require "wp_event/category_post"
