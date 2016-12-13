@@ -39,12 +39,13 @@ option_parser = OptionParser.new do |opts|
   end
 end
 
+# Process options
+option_parser.parse!
+
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 WPEvent.logger.debug "Starting referee sync (#{WPEvent::VERSION})"
 
-# Process options
-option_parser.parse!
 
 if ARGV.length != 1 && STDIN.tty?
   STDERR.puts "Please provide json input file."
