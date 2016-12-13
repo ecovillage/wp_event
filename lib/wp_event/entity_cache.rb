@@ -1,6 +1,8 @@
 module WPEvent
   class EntityCache
     attr_accessor :cpt, :name_id_map, :uuid_id_map
+    attr_accessor :full_data
+
 
     # cpt has to be a WPEvent::PostType extending class/module
     def initialize cpt
@@ -10,6 +12,11 @@ module WPEvent
       if !cpt.is_a? WPEvent::PostType
         raise "Unsupported Entity for EntityCache: #{cpt.class}"
       end
+    end
+
+    def in_mem_lookup uuid
+      @full_data ||= cpt.get_all_posts
+      @full_data.find &WPEvent::Lambdas.with_cf_uuid(uuid)
     end
 
     def id_of_name name
