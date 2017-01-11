@@ -13,6 +13,7 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
+  opts.separator ""
   opts.separator "The standard: Create, update or delete a referee with ..."
 
   opts.on("-u", "--uuid UUID", "Events UUID") do |u|
@@ -33,6 +34,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-d", "--description DESCRIPTION", "Description of the referee") do |d|
     options[:description] = d
   end
+  opts.separator ""
   opts.separator "Other actions (than create or update)"
   opts.on("-l", "--list", "List referees") do |l|
     options[:list] = l
@@ -43,6 +45,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-x", "--export", "Export/print query result to STDOUT (json-ish)") do |x|
     options[:export] = x
   end
+  opts.separator ""
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v

@@ -3,7 +3,6 @@ module WPEvent
     attr_accessor :cpt, :name_id_map, :uuid_id_map
     attr_accessor :full_data
 
-
     # cpt has to be a WPEvent::PostType extending class/module
     def initialize cpt
       @cpt         = cpt

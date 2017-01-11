@@ -23,6 +23,7 @@ option_parser = OptionParser.new do |opts|
     You can use the '--outfile' option to specify where the output shall be written to.  The advantage of the latter option is that #{$PROGRAM_NAME} will fail if the file already exist (which will not happen when using redirection with `>`).
   USAGE
 
+  opts.separator ""
   opts.separator "Filtering options"
   opts.on("-f", "--from DATE", DateTime, "Events starting date (YYYY-MM-DD HH:MM)") do |f|
     options[:from] = f
@@ -40,6 +41,7 @@ option_parser = OptionParser.new do |opts|
     options[:image_store] = s
   end
 
+  opts.separator ""
   opts.separator "Output options"
   opts.on("-o", "--outfile FILE", "File to write data (json) to, fails if file exists, omit this option and the JSONFILE argument to write to STDOUT") do |o|
     options[:outfile] = o
@@ -48,6 +50,7 @@ option_parser = OptionParser.new do |opts|
     options[:pretty_print] = p
   end
 
+  opts.separator ""
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
