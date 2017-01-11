@@ -86,6 +86,8 @@ module WPEvent
       end
     end
 
+    # Return list of wp-ids of referees not found in wordpress but in
+    # event_json.
     def missing_referees event_json
       return [] if !event_json["referee_qualifications"]
       missing_referees = event_json["referee_qualifications"].select do |ref_qa|
@@ -93,6 +95,7 @@ module WPEvent
       end
     end
 
+    # Get wp-ids of event-categories based on the names given in json.
     def category_ids event_json
       ids = @category_cache.id_of_names event_json["category_names"]
 
@@ -104,6 +107,8 @@ module WPEvent
     end
 
     private
+
+    # Parses fromdate and todate and create Ruby DateTime range
     def get_timerange event_json
       DateTime.parse(event_json["fromdate"])..DateTime.parse(event_json["todate"])
     end

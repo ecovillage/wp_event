@@ -13,6 +13,8 @@ module WPEvent
       end
     end
 
+    # Pretty nasty stuff. Stores all posts of cpt in memory (alas,
+    # only once) and looks through them until one with uuid found.
     def in_mem_lookup uuid
       @full_data ||= cpt.get_all_posts
       @full_data.find &WPEvent::Lambdas.with_cf_uuid(uuid)
