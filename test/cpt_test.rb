@@ -10,11 +10,22 @@ class BookCPT < WPEvent::CustomPostType
   #wp_title_field "name" # 'alias', some for content
 end
 
+class MovieCPT < WPEvent::CustomPostType
+  wp_post_type "movies"
+  wp_custom_field_single "year"
+end
+
 class CPTTest < Minitest::Test
   def test_post_type_dec
     assert_equal "books", BookCPT.post_type
     book = BookCPT.new
     assert_equal "books", book.post_type
+  end
+
+  def test_other_post_type_dec
+    assert_equal "movies", MovieCPT.post_type
+    book = MovieCPT.new
+    assert_equal "movies", book.post_type
   end
 
   def test_title_content_featured_image_id
@@ -24,10 +35,23 @@ class CPTTest < Minitest::Test
     assert_equal "20",               book.featured_image_id
   end
 
+  def test_fields
+    assert_equal [''], BookCPT.fields
+    assert_equal [''], BookCPT.new.fields
+    #assert_equal [''], WPEvent::CustomPostType.class_variables
+    #assert_equal [''], BookCPT.class_variables
+  end
+
   def test_has_field
     book = BookCPT.new
     assert_equal true,  book.has_custom_field?("uuid")
-    assert_equal false, book.has_custom_field?("miles")
+    assert_equal false, book.has_custom_field?("year")
+  end
+
+  def test_custom_field_getter
+    book = BookCPT.new
+    assert_equal true,  book.respond_to?("uuid")
+    assert_equal false, book.respond_to?("year")
   end
 
   #def test_from_wp_data
@@ -59,6 +83,24 @@ class CPTTest < Minitest::Test
   def test_field_makes_string
     book = BookCPT.new price: 12.2
     assert_equal "12.2", book.price
+  end
+
+  def test_to_content_hash
+    book = BookCPT.new title: 'home', price: '12.2', uuid: '1122'
+    content_hash = book.to_content_hash
+    content_hash.delete :post_data
+    assert_equal({ post_type: 'books', post_status: 'publish',
+                   post_title: 'home',
+                   custom_fields: [
+                     { key: 'price', value: '12.2'},
+                     { key: 'uuid', value: '1122' } ]},
+                 content_hash)
+  end
+
+  def test_custom_fields_hash
+    book = BookCPT.new price: '12.2'
+    assert_equal([{key: 'price', value: '12.2'}, {key: 'uuid', value: '1122'}],
+                 book.custom_fields_hash)
   end
 
   def test_update
