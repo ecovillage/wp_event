@@ -109,14 +109,15 @@ module WPEvent
 
     def to_content_hash
       content = {
-        post_type:   post_type,
-        post_status: 'publish',
-        post_data:   Time.now,
-        post_title:  title,
+        post_type:     post_type,
+        post_status:   'publish',
+        post_data:     Time.now,
+        post_title:    title,
+        post_content:  @content || '',
         custom_fields: @fields.map{|k,v| v.to_hash}
       }
       if featured_image_id
-        content['post_thumbnail'] = featured_image_id.to_s
+        content[:post_thumbnail] = featured_image_id.to_s
       end
       content
     end

@@ -86,23 +86,26 @@ class CPTTest < Minitest::Test
   end
 
   def test_to_content_hash
-    new_book = BookCPT.new title: 'home', price: '12.2', uuid: '1122'
+    new_book = BookCPT.new title: 'Going home', price: '12.2', uuid: '1122', content: 'back-coming for beginners'
     content_hash = new_book.to_content_hash
     content_hash.delete :post_data
-    assert_equal({ post_type: 'books',
+    assert_equal({ post_type:   'books',
                    post_status: 'publish',
-                   post_title: 'home',
+                   post_title:  'Going home',
+                   post_content:  'back-coming for beginners',
                    custom_fields: [
                      { key: 'price', value: '12.2'},
                      { key: 'uuid', value: '1122' } ]},
                  content_hash)
-    book = BookCPT.new title: 'home', price: '12.2', uuid: '1122', featured_image_id: '2', post_id: '22'
+    book = BookCPT.new title: 'home', price: '12.2', uuid: '1122',
+      featured_image_id: '2', post_id: '22'
     content_hash = book.to_content_hash
     content_hash.delete :post_data
-    assert_equal({ post_type: 'books',
-                   post_status: 'publish',
-                   post_title: 'home',
-                   'post_thumbnail' => '2',
+    assert_equal({ post_type:    'books',
+                   post_status:  'publish',
+                   post_title:   'home',
+                   post_content: '',
+                   post_thumbnail: '2',
                    custom_fields: [
                      { key: 'price', value: '12.2'},
                      { key: 'uuid', value: '1122' } ]},
