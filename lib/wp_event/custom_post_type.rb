@@ -6,7 +6,7 @@ module WPEvent
   # Base class to inherit from for Classes that map to Wordpress
   # Custom Post Types.
   class CustomPostType
-    attr_accessor :post_id, :title, :content
+    attr_accessor :post_id, :title, :content, :featured_image_id
     # TODO fields later will need meta-meta-data, on an instance basis, too.
     @@fields = []
 
@@ -50,6 +50,8 @@ module WPEvent
           @content = v
         elsif k == :post_id
           @post_id = v
+        elsif k == :featured_image_id
+          @featured_image_id = v
         # Better: has_custom_field?
         elsif respond_to?(k)
           #puts "respond to #{k}->setting!"

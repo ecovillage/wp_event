@@ -17,10 +17,11 @@ class CPTTest < Minitest::Test
     assert_equal "books", book.post_type
   end
 
-  def test_title_uuid
-    book = BookCPT.new uuid: '1234-4321', title: 'The first book'
-    assert_equal "The first book", book.title
-    assert_equal "1234-4321",      book.uuid
+  def test_title_content_featured_image_id
+    book = BookCPT.new content: 'See more inside!', title: 'The first book', featured_image_id: "20"
+    assert_equal "The first book",   book.title
+    assert_equal "See more inside!", book.content
+    assert_equal "20",               book.featured_image_id
   end
 
   def test_has_field
@@ -74,6 +75,16 @@ class CPTTest < Minitest::Test
   end
 
   def test_single_custom_field
+    book = BookCPT.new uuid: '1234-4321'
+    assert_equal "1234-4321", book.uuid
+  end
+
+  def test_content_title_aliases
+    # Needs different class. Accept setter and getter
+  end
+
+  def test_featured_image_id
+    # Needs different class. Accept setter and getter
   end
 
   # test_multi_custom_field
