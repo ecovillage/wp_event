@@ -115,6 +115,10 @@ module WPEvent
         post_title:  title,
         custom_fields: @fields.map{|k,v| v.to_hash}
       }
+      if featured_image_id
+        content['post_thumbnail'] = featured_image_id.to_s
+      end
+      content
     end
   end
 end
