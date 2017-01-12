@@ -16,7 +16,7 @@ option_parser = OptionParser.new do |opts|
   opts.separator ""
   opts.separator "The standard: Create, update or delete a referee with ..."
 
-  opts.on("-u", "--uuid UUID", "Events UUID") do |u|
+  opts.on("-u", "--uuid UUID", "Referees UUID") do |u|
     options[:uuid] = u
   end
   opts.on("-i", "--id WPID", "Post ID (WP)") do |i|
