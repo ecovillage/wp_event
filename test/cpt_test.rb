@@ -140,11 +140,6 @@ class CPTTest < Minitest::Test
     # Needs different class. Accept setter and getter
   end
 
-  def test_featured_image_id
-    # Needs different class. Accept setter and getter
-  end
-
   # test_multi_custom_field
   # test_update
-  # test_metadata_creation
 end
