@@ -1,0 +1,82 @@
+require 'test_helper'
+
+class BookCPT < WPEvent::CustomPostType
+  wp_post_type "books"
+  wp_custom_field_single "num_pages"
+  wp_custom_field_single "uuid"
+  wp_custom_field_single "price"
+  #wp_custom_field_multi  "author_id"
+  #wp_custom_field_multi  "author_uuid"
+  #wp_title_field "name" # 'alias', some for content
+end
+
+class CPTTest < Minitest::Test
+  def test_post_type_dec
+    assert_equal "books", BookCPT.post_type
+    book = BookCPT.new
+    assert_equal "books", book.post_type
+  end
+
+  def test_title_uuid
+    book = BookCPT.new uuid: '1234-4321', title: 'The first book'
+    assert_equal "The first book", book.title
+    assert_equal "1234-4321",      book.uuid
+  end
+
+  def test_has_field
+    book = BookCPT.new
+    assert_equal true,  book.has_custom_field?("uuid")
+    assert_equal false, book.has_custom_field?("miles")
+  end
+
+  #def test_from_wp_data
+  #  old_book_data = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
+  #                    "post_status" => "publish", "post_type"  => "book",
+  #                    "post_name"   => "typs-fr-dummis", "post_content" => "",
+  #                    "post_thumbnail" => [],
+  #                    "custom_fields" => [
+  #                      {"id" => "522", "key" => "price", "value" => "12.1"},
+  #                      {"id" => "271", "key" => "uuid",  "value" => "1111-2222"},
+  #                    ]
+  #  }
+  #  book = BookCPT.from_wp_data old_book_data
+  #end
+
+  def test_field_setting_and_getting
+    book = BookCPT.new price: '1'
+    assert_equal "1", book.price
+
+    book.price = '2'
+    assert_equal "2", book.price
+  end
+
+  def test_field_strip
+    book = BookCPT.new price: '  Spaces around me  '
+    assert_equal "Spaces around me", book.price
+  end
+
+  def test_field_makes_string
+    book = BookCPT.new price: 12.2
+    assert_equal "12.2", book.price
+  end
+
+  def test_update
+    old_book_data = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
+                      "post_status" => "publish", "post_type"  => "book",
+                      "post_name"   => "typs-fr-dummis", "post_content" => "",
+                      "post_thumbnail" => [],
+                      "custom_fields" => [
+                        {"id" => "522", "key" => "price", "value" => "12.1"},
+                        {"id" => "271", "key" => "uuid",  "value" => "1111-2222"},
+                      ]
+    }
+    book = BookCPT.new uuid: '1111-2222', title: 'Typos for dummies', price: 12.2
+  end
+
+  def test_single_custom_field
+  end
+
+  # test_multi_custom_field
+  # test_update
+  # test_metadata_creation
+end
