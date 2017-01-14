@@ -36,10 +36,8 @@ class CPTTest < Minitest::Test
   end
 
   def test_fields
-    assert_equal [''], BookCPT.fields
-    assert_equal [''], BookCPT.new.fields
-    #assert_equal [''], WPEvent::CustomPostType.class_variables
-    #assert_equal [''], BookCPT.class_variables
+    assert_equal ['num_pages', 'uuid', 'price'], BookCPT.supported_fields
+    assert_equal ['num_pages', 'uuid', 'price'], BookCPT.new.supported_fields
   end
 
   def test_has_field
@@ -53,19 +51,6 @@ class CPTTest < Minitest::Test
     assert_equal true,  book.respond_to?("uuid")
     assert_equal false, book.respond_to?("year")
   end
-
-  #def test_from_wp_data
-  #  old_book_data = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
-  #                    "post_status" => "publish", "post_type"  => "book",
-  #                    "post_name"   => "typs-fr-dummis", "post_content" => "",
-  #                    "post_thumbnail" => [],
-  #                    "custom_fields" => [
-  #                      {"id" => "522", "key" => "price", "value" => "12.1"},
-  #                      {"id" => "271", "key" => "uuid",  "value" => "1111-2222"},
-  #                    ]
-  #  }
-  #  book = BookCPT.from_wp_data old_book_data
-  #end
 
   def test_field_setting_and_getting
     book = BookCPT.new price: '1'
@@ -113,8 +98,8 @@ class CPTTest < Minitest::Test
   end
 
   def test_custom_fields_hash
-    book = BookCPT.new price: '12.2'
-    assert_equal([{key: 'price', value: '12.2'}, {key: 'uuid', value: '1122'}],
+    book = BookCPT.new price: '12.2', uuid: '1222'
+    assert_equal([{key: 'price', value: '12.2'}, {key: 'uuid', value: '1222'}],
                  book.custom_fields_hash)
   end
 
@@ -128,7 +113,13 @@ class CPTTest < Minitest::Test
                         {"id" => "271", "key" => "uuid",  "value" => "1111-2222"},
                       ]
     }
-    book = BookCPT.new uuid: '1111-2222', title: 'Typos for dummies', price: 12.2
+    old_book = BookCPT.from_content_hash old_book_data
+    book = BookCPT.new uuid: '1111-2222', title: 'Typos for dummies', price: "12.2"
+    book.integrate_field_ids old_book
+    assert_equal "Typos for dummies", book.title
+    assert_equal "522", book.field("price").id
+    assert_equal "12.2", book.field("price").value
+    assert_equal "12.2", book.price
   end
 
   def test_single_custom_field
@@ -138,6 +129,30 @@ class CPTTest < Minitest::Test
 
   def test_content_title_aliases
     # Needs different class. Accept setter and getter
+  end
+
+  def test_change
+    book = BookCPT.new uuid: '1234-4321'
+  end
+
+  def test_from_content_hash
+    content_hash = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
+                     "post_status" => "publish", "post_type"  => "book",
+                     "post_name"   => "typs-fr-dummis", "post_content" => "",
+                     "post_thumbnail" => [],
+                     "custom_fields" => [
+                       {"id" => "522", "key" => "price", "value" => "12.1"},
+                       {"id" => "271", "key" => "uuid",  "value" => "1111-2222"},
+                     ]
+    }
+    book = BookCPT.from_content_hash content_hash
+    assert_equal "1066", book.post_id
+    assert_equal "", book.content
+    assert_equal "Typs fr dummis", book.title
+    assert_equal "12.1", book.price
+    assert_equal "522", book.field("price").id
+    assert_equal "1111-2222", book.uuid
+    # TODO test thumbnail setting: "post_thumbnail" => []
   end
 
   # test_multi_custom_field

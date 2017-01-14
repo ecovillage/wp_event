@@ -22,6 +22,7 @@ module WPEvent
   class CustomPostType
     attr_accessor :post_id, :title, :content, :featured_image_id
     # TODO fields later will need meta-meta-data, on an instance basis, too.
+    attr_accessor :fields
 
     def self.wp_post_type(wp_post_type)
       # TODO syntax: define_method("....")
@@ -57,6 +58,7 @@ module WPEvent
       # Add field to @@field list
       self.class_eval("(@@fields_proto ||= [])")
       self.class_eval("@@fields_proto << '#{field_key}'")
+      self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
     end
 
     def has_custom_field? field_name
@@ -89,22 +91,39 @@ module WPEvent
     end
 
     def custom_fields_hash
-      self.class.class_variable_get(:@@fields).map do |field|
-        field_sym = field.to_sym
-        { key: field_sym, value: send(field_sym) }
-      end
+      @fields.values.map(&:to_hash)
     end
 
-    def fields
-      @@fields_proto
-    end
-
-    def self.fields
-      @@fields_proto
-    end
+    #def self.fields
+    #  self.class.class_variable_get(:@@fields_proto)
+    #  #self.class.class_variable_get(:@@fields_proto)
+    #end
 
     def field(field_name)
       @fields[field_name]
+    end
+
+    def supported_fields
+      self.class.instance_variable_get(:@supported_fields)
+    end
+
+    def self.supported_fields
+      instance_variable_get(:@supported_fields)
+    end
+
+    def self.from_content_hash content_hash
+      entity = new(post_id: content_hash["post_id"],
+                   content: content_hash["post_content"],
+                   title:   content_hash["post_title"])
+      custom_fields_list = content_hash["custom_fields"] || []
+      supported_fields.each do |field_key|
+        field = custom_fields_list.find{|f| f["key"] == field_key}
+        if field
+          entity.send("#{field_key}=".to_sym, field["value"])
+          entity.field(field_key).id = field["id"]
+        end
+      end
+      entity
     end
 
     def to_content_hash
@@ -120,6 +139,22 @@ module WPEvent
         content[:post_thumbnail] = featured_image_id.to_s
       end
       content
+    end
+
+    def integrate_field_ids other_entity
+      # new from old
+      fields.values.each do |f|
+        f.id = other_entity.field(f.key).id
+      end
+
+      # old to new
+      #other_entity.fields.each do |f|
+      #  field(f.key).id = f.id
+      #end
+    end
+
+    def in_wordpress?
+      !post_id
     end
   end
 end
