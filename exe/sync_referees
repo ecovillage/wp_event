@@ -65,6 +65,7 @@ json = input.read
 referees = JSON.parse json
 # nicer parse error display, begin..rescue
 
+referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
@@ -72,7 +73,7 @@ syncer = WPEvent::RefereeSyncer.new media_cache, image_uploader
 
 referees.each_with_index do |referee, idx|
 
-  wp_referee = WPEvent::RefereePost.uuid_in_wordpress? referee["uuid"]
+  wp_referee = referee_cache.in_mem_lookup(referee["uuid"])
 
   info "(#{idx + 1}/#{referees.length}): Processing referee with uuid #{referee['uuid']}"
   syncer.create_or_update wp_referee, referee
