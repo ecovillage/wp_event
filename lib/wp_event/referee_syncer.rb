@@ -2,10 +2,9 @@ module WPEvent
   class RefereeSyncer
     include WPEvent::CLI::Logging
 
-    attr_accessor :media_cache, :image_uploader
+    attr_accessor :image_uploader
 
-    def initialize media_cache, image_uploader
-      @media_cache    = media_cache
+    def initialize image_uploader
       @image_uploader = image_uploader
     end
 

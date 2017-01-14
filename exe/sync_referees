@@ -69,7 +69,7 @@ referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::RefereeSyncer.new media_cache, image_uploader
+syncer = WPEvent::RefereeSyncer.new image_uploader
 
 referees.each_with_index do |referee, idx|
 
