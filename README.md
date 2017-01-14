@@ -8,12 +8,12 @@ Licensed under the GPLv3+, Copyright 2016 Felix Wolfsteller.
 
 To use the **standalone** functionality, install it yourself as:
 
-    $ gem install auto_event_post
+    $ gem install wp_event
 
 For **library usage** add this line to your application's Gemfile:
 
 ```ruby
-gem 'auto_event_post'
+gem 'wp_event'
 ```
 
 And execute:
