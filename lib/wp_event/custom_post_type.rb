@@ -47,17 +47,18 @@ module WPEvent
     # Note that the accessor only wears strings and automatically strips
     def self.wp_custom_field_single(field_key)
       # def field_key=(new_value)
-      #   @field_key = new_value.to_s.strip
+      #   field('field_key') = new_value.to_s.strip
       # end
-      self.class_eval("def #{field_key.to_s}=(new_value); field('#{field_key}').value = new_value; @#{field_key.to_s} = new_value.to_s.strip; end")
+      self.class_eval("def #{field_key.to_s}=(new_value); field('#{field_key}').value = new_value.to_s.strip; end")
       # def field_key
-      #   @field[field_key].value = new_value
-      #   @field_key
+      #   field(field_key).value
       # end
-      self.class_eval("def #{field_key.to_s}; return @#{field_key.to_s}; end")
-      # Add field to @@field list
+      self.class_eval("def #{field_key.to_s}; return field('#{field_key.to_s}').value; end")
+      # Add field to @@fields_proto list
       self.class_eval("(@@fields_proto ||= [])")
       self.class_eval("@@fields_proto << '#{field_key}'")
+      # Add field to @supported_fields.
+      # This is declared in the class, thus a kindof CLASS variable!
       self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
     end
 
