@@ -5,13 +5,14 @@ class BookCPT < WPEvent::CustomPostType
   wp_custom_field_single "num_pages"
   wp_custom_field_single "uuid"
   wp_custom_field_single "price"
+  wp_post_content_alias   "description" # 'alias'
   #wp_custom_field_multi  "author_id"
   #wp_custom_field_multi  "author_uuid"
-  #wp_title_field "name" # 'alias', some for content
 end
 
 class MovieCPT < WPEvent::CustomPostType
   wp_post_type "movies"
+  wp_post_title_alias     "name" # 'alias'
   wp_custom_field_single "year"
 end
 
@@ -24,8 +25,8 @@ class CPTTest < Minitest::Test
 
   def test_other_post_type_dec
     assert_equal "movies", MovieCPT.post_type
-    book = MovieCPT.new
-    assert_equal "movies", book.post_type
+    movie = MovieCPT.new
+    assert_equal "movies", movie.post_type
   end
 
   def test_title_content_featured_image_id
@@ -127,8 +128,40 @@ class CPTTest < Minitest::Test
     assert_equal "1234-4321", book.uuid
   end
 
-  def test_content_title_aliases
-    # Needs different class. Accept setter and getter
+  def test_title_alias
+    movie = MovieCPT.new name: 'The superanimal'
+    assert_equal "The superanimal", movie.title
+    assert_equal "The superanimal", movie.name
+
+    movie.name = "The superanimal 2"
+    assert_equal "The superanimal 2", movie.title
+    assert_equal "The superanimal 2", movie.name
+
+    movie.title = "The superanimal 3"
+    assert_equal "The superanimal 3", movie.title
+    assert_equal "The superanimal 3", movie.name
+
+    movie = MovieCPT.new title: 'The superanimal'
+    assert_equal "The superanimal", movie.title
+    assert_equal "The superanimal", movie.name
+  end
+
+  def test_content_aliases
+    book = BookCPT.new description: 'The ultimate superanimal book'
+    assert_equal "The ultimate superanimal book", book.description
+    assert_equal "The ultimate superanimal book", book.content
+
+    book.description = "The ultimate superanimal book 2"
+    assert_equal "The ultimate superanimal book 2", book.description
+    assert_equal "The ultimate superanimal book 2", book.content
+
+    book.description = "The ultimate superanimal book 3"
+    assert_equal "The ultimate superanimal book 3", book.description
+    assert_equal "The ultimate superanimal book 3", book.content
+
+    book = BookCPT.new description: 'The ultimate superanimal book'
+    assert_equal "The ultimate superanimal book", book.description
+    assert_equal "The ultimate superanimal book", book.content
   end
 
   def test_change

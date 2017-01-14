@@ -62,6 +62,16 @@ module WPEvent
       self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
     end
 
+    def self.wp_post_title_alias(title_alias)
+      self.class_eval("alias :#{title_alias.to_sym}= :title=")
+      self.class_eval("alias :#{title_alias.to_sym}  :title")
+    end
+
+    def self.wp_post_content_alias(content_alias)
+      self.class_eval("alias :#{content_alias.to_sym}= :content=")
+      self.class_eval("alias :#{content_alias.to_sym}  :content")
+    end
+
     def has_custom_field? field_name
       self.class.class_variable_get(:@@fields_proto).include? field_name
     end
