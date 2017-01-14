@@ -165,7 +165,7 @@ module WPEvent
     end
 
     def in_wordpress?
-      !post_id
+      post_id.to_s != '' && !!post_id
     end
   end
 end

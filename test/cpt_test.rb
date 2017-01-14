@@ -188,6 +188,15 @@ class CPTTest < Minitest::Test
     # TODO test thumbnail setting: "post_thumbnail" => []
   end
 
+  def test_in_wordpress?
+    book = BookCPT.new post_id: "12"
+    assert_equal true, book.in_wordpress?
+    book = BookCPT.new price: '22.0'
+    assert_equal false, book.in_wordpress?
+    book = BookCPT.new post_id: ""
+    assert_equal false, book.in_wordpress?
+  end
+
   # test_multi_custom_field
   # test_update
 end
