@@ -10,9 +10,9 @@ module WPEvent
 
     def to_hash
       if @id
-        { id: @id, key: @key, value: @value}
+        { id: @id, key: @key, value: @value || ''}
       else
-        { key: @key, value: @value}
+        { key: @key, value: @value || ''}
       end
     end
   end

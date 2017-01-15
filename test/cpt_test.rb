@@ -29,6 +29,30 @@ class CPTTest < Minitest::Test
     assert_equal "movies", movie.post_type
   end
 
+  def test_double_splat_init
+    hash = {name: 'Splatter'}
+    movie = MovieCPT.new **hash
+    assert_equal "Splatter", movie.title
+
+    # Notice this will fail with nasty-to-debug
+    # "TypeError: wrong argument type String (expected Symbol)":
+    # MovieCPT.new **{ 'name' => 'Splatter' }
+  end
+
+  def test_nil_guard_content_hash
+    book = BookCPT.new price: nil
+    content_hash = book.to_content_hash
+    content_hash.delete :post_data
+    assert_equal({ post_type:    'books',
+                   post_status:  'publish',
+                   post_title:   '',
+                   post_content: '',
+                   custom_fields: [
+                     { key: 'price', value: ''},
+                   ]},
+                 content_hash)
+  end
+
   def test_title_content_featured_image_id
     book = BookCPT.new content: 'See more inside!', title: 'The first book', featured_image_id: "20"
     assert_equal "The first book",   book.title
