@@ -62,22 +62,31 @@ end
 input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
 json = input.read
 
-referees = JSON.parse json
-# nicer parse error display, begin..rescue
+referees = JSON.parse json#, symbolize_names: true
+# TODO nicer parse error display, begin..rescue
 
 referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::RefereeSyncer.new image_uploader
+syncer = WPEvent::Syncer.new image_uploader
 
 referees.each_with_index do |referee, idx|
 
   wp_referee = referee_cache.in_mem_lookup(referee["uuid"])
 
   info "(#{idx + 1}/#{referees.length}): Processing referee with uuid #{referee['uuid']}"
-  syncer.create_or_update wp_referee, referee
 
+  # Transform string keys to symbol keys.
+  # This **could** be done directly while parsing the json:
+  #   x = JSON.parse json, symbolize_names: true
+  referee.keys.each do |key|
+      referee[(key.to_sym rescue key) || key] = referee.delete(key)
+  end
+
+  debug "Referee from cache: #{wp_referee}"
+
+  syncer.create_or_update WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee), referee
 end
 
 exit 0
