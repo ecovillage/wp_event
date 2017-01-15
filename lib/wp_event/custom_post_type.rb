@@ -91,7 +91,7 @@ module WPEvent
         elsif k == :featured_image_id
           @featured_image_id = v
         # Better: has_custom_field?
-        elsif respond_to?(k)
+        elsif respond_to?(k.to_sym)
           #puts "respond to #{k}->setting!"
           #puts("#{k}=('#{v}')")
           #self.instance_eval("#{k} = '#{v}'")
@@ -142,7 +142,7 @@ module WPEvent
         post_type:     post_type,
         post_status:   'publish',
         post_data:     Time.now,
-        post_title:    title,
+        post_title:    title    || '', # why does content need '@'?
         post_content:  @content || '',
         custom_fields: @fields.map{|k,v| v.to_hash}
       }

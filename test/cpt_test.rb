@@ -5,14 +5,14 @@ class BookCPT < WPEvent::CustomPostType
   wp_custom_field_single "num_pages"
   wp_custom_field_single "uuid"
   wp_custom_field_single "price"
-  wp_post_content_alias   "description" # 'alias'
+  wp_post_content_alias  "description" # 'alias'
   #wp_custom_field_multi  "author_id"
   #wp_custom_field_multi  "author_uuid"
 end
 
 class MovieCPT < WPEvent::CustomPostType
   wp_post_type "movies"
-  wp_post_title_alias     "name" # 'alias'
+  wp_post_title_alias    "name" # 'alias'
   wp_custom_field_single "year"
 end
 
