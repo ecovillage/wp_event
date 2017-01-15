@@ -39,9 +39,7 @@ WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 debug "Starting event category sync (#{WPEvent::VERSION})"
 
-# Process options
-option_parser.parse!
-
+# Dont we have the tools library for that?
 if ARGV.length != 1
   STDERR.puts "Please provide json input file."
   puts option_parser
@@ -51,8 +49,7 @@ end
 begin
   WPEvent.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
-  exit 3
+  exit_with 3, "Config file (wp_event.conf) not found."
 end
 
 categories = JSON.parse File.read(ARGV[0])
