@@ -7,6 +7,7 @@ require "wp_event/cli/tool"
 require "wp_event/lambdas"
 
 require "wp_event/custom_post_type"
+require "wp_event/custom_post_types/referee"
 require "wp_event/syncer"
 
 require "wp_event/post_type"
