@@ -2,6 +2,7 @@ module WPEvent
   module CustomPostTypes
     class Referee < CustomPostType
       wp_post_type 'ev7l-referee'
+      wp_post_content_alias  'description'
       wp_custom_field_single 'uuid'
       wp_custom_field_single 'firstname'
       wp_custom_field_single 'lastname'
