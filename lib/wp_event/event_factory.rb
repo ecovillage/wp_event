@@ -62,7 +62,7 @@ module WPEvent
       # from {uuid: 1, q: '2'} we need {id: 123, q: '2'}
       data = {}
       event_json[:referee_qualifications].each do |rq|
-        uuid = rq[:uuid]
+        uuid = rq["uuid"]
         data[uuid] = { uuid: uuid,
                        id: @referee_cache.id_of_uuid(uuid),
                        qualification: rq[:qualification] }

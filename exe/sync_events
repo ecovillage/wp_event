@@ -111,7 +111,7 @@ events.each_with_index do |event, idx|
   rescue WPEvent::MissingRefereeError => e
     # More info: ..
     #exit_with 8, "A required referee (in #{event_json['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
-    exit_with 8, "A required referee (in #{e.missing_referees.map{|r| r["uuid"]}}) does not exist, aborting."
+    exit_with 8, "A required referee (in uuids: #{e.missing_referees}) does not exist, aborting."
   end
 end
 
