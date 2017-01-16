@@ -60,8 +60,9 @@ class CPTTest < Minitest::Test
   end
 
   def test_fields
-    assert_equal ['num_pages', 'uuid', 'price'], BookCPT.supported_fields
-    assert_equal ['num_pages', 'uuid', 'price'], BookCPT.new.supported_fields
+    asserted_field_list = ['num_pages', 'uuid', 'price', 'author_id']
+    assert_equal asserted_field_list, BookCPT.supported_fields
+    assert_equal asserted_field_list, BookCPT.new.supported_fields
   end
 
   def test_has_field
@@ -218,6 +219,26 @@ class CPTTest < Minitest::Test
     assert_equal false, book.in_wordpress?
     book = BookCPT.new post_id: ""
     assert_equal false, book.in_wordpress?
+  end
+
+  def test_is_multi_field?
+    book = BookCPT.new post_id: ""
+    assert_equal true, BookCPT.is_multi_field?('author_id')
+    assert_equal true, book.is_multi_field?('author_id')
+    assert_equal false, BookCPT.is_multi_field?('price')
+    assert_equal false, book.is_multi_field?('price')
+    assert_equal false, BookCPT.is_multi_field?('miles')
+    assert_equal false, book.is_multi_field?('miles')
+  end
+
+  def test_is_single_field?
+    book = BookCPT.new post_id: ""
+    assert_equal true, BookCPT.is_single_field?('price')
+    assert_equal true, book.is_single_field?('price')
+    assert_equal false, BookCPT.is_single_field?('author_id')
+    assert_equal false, book.is_single_field?('author_id')
+    assert_equal false, BookCPT.is_single_field?('miles')
+    assert_equal false, book.is_single_field?('miles')
   end
 
   def test_multi_custom_field

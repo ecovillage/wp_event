@@ -58,12 +58,10 @@ module WPEvent
       #   field(field_key).value
       # end
       self.class_eval("def #{field_key.to_s}; return field('#{field_key.to_s}').value; end")
-      # Add field to @@fields_proto list
-      self.class_eval("(@@fields_proto ||= [])")
-      self.class_eval("@@fields_proto << '#{field_key}'")
-      # Add field to @supported_fields.
+
+      # Add field to @supported_(single_)fields.
       # This is declared in the class, thus a kindof CLASS variable!
-      self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
+      self.class_eval("(@supported_single_fields ||= []) << '#{field_key}'")
     end
 
     # Specify a field that will make and take a fine array.
@@ -78,13 +76,9 @@ module WPEvent
       # end
       self.class_eval("def #{field_key.to_s}; return multi_field('#{field_key.to_s}').map(&:value); end")
 
-      # From here on we should differ
-      # Add field to @@fields_proto list
-      self.class_eval("(@@fields_proto ||= [])")
-      self.class_eval("@@fields_proto << '#{field_key}'")
-      # Add field to @supported_fields.
+      # Add field to @supported_(multi_)fields.
       # This is declared in the class, thus a kindof CLASS variable!
-      self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
+      self.class_eval("(@supported_multi_fields ||= []) << '#{field_key}'")
     end
 
     def self.wp_post_title_alias(title_alias)
@@ -98,7 +92,7 @@ module WPEvent
     end
 
     def has_custom_field? field_name
-      self.class.class_variable_get(:@@fields_proto).include? field_name
+      supported_fields.include? field_name
     end
 
     def initialize **kwargs
@@ -150,9 +144,19 @@ module WPEvent
 
     # Returns list of field keys generally supported by this Custom Post Type
     def self.supported_fields
-      instance_variable_get(:@supported_fields)
+      supported_single_fields | supported_multi_fields
     end
 
+    def self.supported_single_fields
+      instance_variable_get(:@supported_single_fields) || []
+    end
+
+    def self.supported_multi_fields
+      instance_variable_get(:@supported_multi_fields) || []
+    end
+
+    # From a Hash as returned by RubyPress's getPost(s) method
+    # populate and return a new CustomPostType-instance.
     def self.from_content_hash content_hash
       entity = new(post_id: content_hash["post_id"],
                    content: content_hash["post_content"],
@@ -193,6 +197,22 @@ module WPEvent
       #other_entity.fields.each do |f|
       #  field(f.key).id = f.id
       #end
+    end
+
+    def is_multi_field?(field_name)
+      self.class.is_multi_field?(field_name)
+    end
+
+    def self.is_multi_field?(field_name)
+      supported_multi_fields.include? field_name
+    end
+
+    def is_single_field?(field_name)
+      self.class.is_single_field?(field_name)
+    end
+
+    def self.is_single_field?(field_name)
+      supported_single_fields.include? field_name
     end
 
     def in_wordpress?
