@@ -7,8 +7,11 @@ require "wp_event/cli/tool"
 require "wp_event/lambdas"
 
 require "wp_event/custom_post_type"
+require "wp_event/custom_post_types/category"
+require "wp_event/custom_post_types/event"
 require "wp_event/custom_post_types/referee"
 require "wp_event/syncer"
+require "wp_event/event_factory"
 
 require "wp_event/post_type"
 require "wp_event/post_meta_data"
