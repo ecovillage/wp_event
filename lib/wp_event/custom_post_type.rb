@@ -173,9 +173,12 @@ module WPEvent
           end
         else
           fields = custom_fields_list.select{|f| f["key"] == field_key}
-          entity.send("#{field_key}=".to_sym, fields.map{|f| f["value"]})
-          # TODO get the ids in there!
-          #entity.field(field_key).id = field["id"]
+          values = fields.map{|f| f["value"]}
+          entity.send("#{field_key}=".to_sym, values)
+          # Not elegant: Set the id one per one
+          fields.each do |f|
+            entity.set_field_id(field_key, f["value"], f["id"])
+          end
         end
       end
       entity
@@ -232,7 +235,7 @@ module WPEvent
       if is_single_field? field_key
         field(field_key).id = field_id
       else
-        multi_field(field_key).find{|f| f.key == field_key}.id = field_id
+        multi_field(field_key).find{|f| f.key == field_key && f.value == field_value}.id = field_id
       end
     end
   end

@@ -272,7 +272,7 @@ class CPTTest < Minitest::Test
     }
     book = BookCPT.from_content_hash content_hash
     assert_equal "522", book.multi_field("author_id")[0].id
-    assert_equal nil,   book.multi_field("author_id")[2].id
+    assert_equal nil,   book.multi_field("author_id")[1].id
 
     book.set_field_id("author_id", "12", "912")
     assert_equal "912", book.multi_field("author_id")[0].id
