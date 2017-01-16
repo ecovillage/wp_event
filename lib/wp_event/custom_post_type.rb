@@ -161,12 +161,21 @@ module WPEvent
       entity = new(post_id: content_hash["post_id"],
                    content: content_hash["post_content"],
                    title:   content_hash["post_title"])
+
       custom_fields_list = content_hash["custom_fields"] || []
+
       supported_fields.each do |field_key|
-        field = custom_fields_list.find{|f| f["key"] == field_key}
-        if field
-          entity.send("#{field_key}=".to_sym, field["value"])
-          entity.field(field_key).id = field["id"]
+        if is_single_field? field_key
+          field = custom_fields_list.find{|f| f["key"] == field_key}
+          if field
+            entity.send("#{field_key}=".to_sym, field["value"])
+            entity.field(field_key).id = field["id"]
+          end
+        else
+          fields = custom_fields_list.select{|f| f["key"] == field_key}
+          entity.send("#{field_key}=".to_sym, fields.map{|f| f["value"]})
+          # TODO get the ids in there!
+          #entity.field(field_key).id = field["id"]
         end
       end
       entity

@@ -252,6 +252,14 @@ class CPTTest < Minitest::Test
   end
 
   def test_multi_custom_field_from_hash
-   skip("nyi")
+    content_hash = { "post_id"     => "1066", "post_title" => "Typs fr dummis",
+                     "post_type"  => "book",
+                     "custom_fields" => [
+                       {"id" => "522", "key" => "author_id", "value" => "HansenID"},
+                       {"id" => "271", "key" => "author_id", "value" => "JohnsonID"},
+                     ]
+    }
+    book = BookCPT.from_content_hash content_hash
+    assert_equal ["HansenID", "JohnsonID"], book.author_id
   end
 end
