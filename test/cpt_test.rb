@@ -262,4 +262,20 @@ class CPTTest < Minitest::Test
     book = BookCPT.from_content_hash content_hash
     assert_equal ["HansenID", "JohnsonID"], book.author_id
   end
+
+  def test_set_field_id
+    content_hash = { "post_title" => "Typs fr dummis", "post_type"  => "book",
+                     "custom_fields" => [
+                       {"id" => "522", "key" => "author_id", "value" => "12"},
+                       {"key" => "author_id", "value" => "13"},
+                     ]
+    }
+    book = BookCPT.from_content_hash content_hash
+    assert_equal "522", book.multi_field("author_id")[0].id
+    assert_equal nil,   book.multi_field("author_id")[2].id
+
+    book.set_field_id("author_id", "12", "912")
+    assert_equal "912", book.multi_field("author_id")[0].id
+    assert_equal nil,   book.multi_field("author_id")[1].id
+  end
 end

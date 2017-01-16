@@ -227,5 +227,13 @@ module WPEvent
     def in_wordpress?
       post_id.to_s != '' && !!post_id
     end
+
+    def set_field_id field_key, field_value, field_id
+      if is_single_field? field_key
+        field(field_key).id = field_id
+      else
+        multi_field(field_key).find{|f| f.key == field_key}.id = field_id
+      end
+    end
   end
 end
