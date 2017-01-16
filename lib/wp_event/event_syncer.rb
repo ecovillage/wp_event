@@ -20,13 +20,12 @@ module WPEvent
     include WPEvent::CLI::Logging
     include WPEvent::CLI
 
-    attr_accessor :category_cache, :referee_cache, :media_cache, :image_uploader
+    attr_accessor :category_cache, :referee_cache, :image_uploader
     attr_accessor :raise_on_missing_referee
 
-    def initialize category_cache, referee_cache, media_cache, image_uploader, raise_on_missing_referee: true
+    def initialize category_cache, referee_cache, image_uploader, raise_on_missing_referee: true
       @category_cache = category_cache
       @referee_cache  = referee_cache
-      @media_cache    = media_cache
       @image_uploader = image_uploader
       @raise_on_missing_referee = raise_on_missing_referee
     end
