@@ -31,8 +31,8 @@ module WPEvent
       category_ids   = category_ids(category_names)
 
       event_json[:event_category_id] = category_ids
-      event_json[:fromdate] = DateTime.parse(event_json[:fromdate]).to_time.to_i
-      event_json[:todate]   = DateTime.parse(event_json[:todate]).to_time.to_i
+      event_json[:fromdate] = DateTime.parse(event_json[:fromdate]).to_time.to_i rescue ''
+      event_json[:todate]   = DateTime.parse(event_json[:todate]).to_time.to_i rescue ''
 
       WPEvent::CustomPostTypes::Event.new **event_json
     end
