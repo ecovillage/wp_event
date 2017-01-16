@@ -158,6 +158,7 @@ module WPEvent
     # From a Hash as returned by RubyPress's getPost(s) method
     # populate and return a new CustomPostType-instance.
     def self.from_content_hash content_hash
+      return nil if content_hash.nil?
       entity = new(post_id: content_hash["post_id"],
                    content: content_hash["post_content"],
                    title:   content_hash["post_title"])

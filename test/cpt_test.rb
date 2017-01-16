@@ -192,6 +192,12 @@ class CPTTest < Minitest::Test
     book = BookCPT.new uuid: '1234-4321'
   end
 
+  def test_from_content_hash_nil
+    content_hash = nil
+    book = BookCPT.from_content_hash content_hash
+    assert_nil nil, book
+  end
+
   def test_from_content_hash
     content_hash = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
                      "post_status" => "publish", "post_type"  => "book",
