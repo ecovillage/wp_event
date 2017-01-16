@@ -10,46 +10,68 @@ module WPEvent
       @image_uploader = image_uploader
     end
 
-    # merge and sync ...!
-    # TODO json: new or old? symbols or strings?
-    def create_or_update custom_post, json
-      if custom_post.in_wordpress?
+    # Updates or creates Custom Post Types Posts.
+    #
+    # The post will be identified by uuid (or not).
+    #
+    #   new_post_content
+    #     The data that **should** be in wordpress (without knowing
+    #     of wordpress post or custom field ids).
+    #
+    #   old_post
+    #     The data currently available in wordpress (including
+    #     wordpress post id, custom field ids).
+    def merge_push new_post, old_post
+      if old_post && old_post.in_wordpress?
+        info "#{new_post.class.name} with UUID #{new_post.uuid} found, updating"
 
-        info "#{custom_post.class.name} with UUID #{custom_post.uuid} found, updating"
+        new_post.post_id = old_post.post_id
+        new_post.integrate_field_ids old_post
 
-        # Symbolize the keys here?
-        new_entity = custom_post.class.new(**json)
-        new_entity.integrate_field_ids custom_post
-        content = new_entity.to_content_hash
-        content[:term_names]  = { 'language' => ['Deutsch'] }
-        content[:post_author] = 1
+        # TODO unclear how to deal with images
+        #attachment_id = @image_uploader.process json['image_url']
+        #new_entity.featured_image_id = attachment_id
 
-        # ... ! keys of json symbolized?
-        attachment_id = @image_uploader.process json['image_url']
-        new_entity.featured_image_id = attachment_id
+        content = new_post.to_content_hash
+        adjust_content content
+        # TODO and image ...
 
-        debug "Updating post with id #{custom_post.post_id}"
-        debug "Content is: #{content}"
-        debug "Old entity: #{custom_post.to_s}"
+        debug "Upload Post ##{new_post.post_id} with wp-content: #{content}"
 
-        WPEvent::wp.editPost(blog_id: 0,
-                             post_id: custom_post.post_id,
-                             content: content)
+        post_id = WPEvent::wp.editPost(blog_id: 0,
+                                       post_id: new_post.post_id,
+                                       content: content)
+        if post_id
+          info "#{new_post.class} ##{new_post.post_id} updated"
+        else
+          info "#{new_post.class} ##{new_post.post_id} not updated!"
+        end
       else
-        # Create
-        info "#{custom_post.class.name} with UUID #{custom_post.uuid} not found, creating"
-        content = custom_post.to_content_hash
-        content[:term_names]  = { 'language' => ['Deutsch'] }
-        content[:post_author] = 1
+        # Easy, create new one
+        info "#{new_post.class.name} with UUID #{new_post.uuid} not found, creating"
+        content = new_post.to_content_hash
+        adjust_content content
 
-        attachment_id = @image_uploader.process json['image_url']
-        custom_post.featured_image_id = attachment_id
+        # Ouch ....
+        #attachment_id = @image_uploader.process json['image_url']
+        #custom_post.featured_image_id = attachment_id
 
         debug "Create Post with wp-content: #{content}"
 
-        WPEvent::wp.newPost(blog_id: 0,
-                            content: content)
+        new_post_id = WPEvent::wp.newPost(blog_id: 0,
+                                          content: content)
+        if new_post_id
+          info "#{new_post.class} with WP ID #{new_post_id} created"
+        else
+          info "#{new_post.class} not created!"
+        end
       end
+    end
+
+    # Add language term and post author data to WP content hash.
+    def adjust_content content
+      content[:term_names]  = { 'language' => ['Deutsch'] }
+      content[:post_author] = 1
     end
   end
 end
