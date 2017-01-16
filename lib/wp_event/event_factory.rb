@@ -11,10 +11,11 @@ module WPEvent
     include WPEvent::CLI::Logging
     include WPEvent::CLI
 
-    attr_accessor :category_cache
+    attr_accessor :category_cache, :referee_cache
 
     def initialize #image_uploader, raise_on_missing_referee: true
       @category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+      @referee_cache  = WPEvent::EntityCache.new(WPEvent::CategoryPost)
     end
 
     # Modifies event_json!
