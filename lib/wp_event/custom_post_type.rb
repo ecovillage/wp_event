@@ -8,11 +8,20 @@ module WPEvent
       @value = value
     end
 
+    # Convert to hash that is consumable by RubyPress/Wordpress.
+    # Important that neither key nor value are present for custom field
+    # values that should be *deleted* in wordpress instance.
     def to_hash
       if @id
-        { id: @id, key: @key, value: @value || ''}
+        hsh = { id: @id }
+        hsh[:key]   = @key if @key
+        hsh[:value] = @value if @value
+        hsh
       else
-        { key: @key, value: @value || ''}
+        hsh = {}
+        hsh[:key]   = @key if @key
+        hsh[:value] = @value if @value
+        hsh
       end
     end
   end
