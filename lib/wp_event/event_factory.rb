@@ -11,11 +11,12 @@ module WPEvent
     include WPEvent::CLI::Logging
     include WPEvent::CLI
 
-    attr_accessor :category_cache, :referee_cache
+    attr_accessor :category_cache, :referee_cache, :raise_on_missing_referee
 
-    def initialize #image_uploader, raise_on_missing_referee: true
+    def initialize raise_on_missing_referee: true
       @category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
       @referee_cache  = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+      @raise_on_missing_referee = raise_on_missing_referee
     end
 
     # Modifies event_json!
@@ -34,10 +35,40 @@ module WPEvent
       event_json[:fromdate] = DateTime.parse(event_json[:fromdate]).to_time.to_i rescue ''
       event_json[:todate]   = DateTime.parse(event_json[:todate]).to_time.to_i rescue ''
 
-      WPEvent::CustomPostTypes::Event.new **event_json
+      ref_data = referee_data(event_json)
+      referee_ids = ref_data.map{|k,v| v[:id]}.compact
+      missing_referee_uuids = ref_data.values.select{|v| v[:id].nil?}.map{|v| v[:uuid]}
+
+      if @raise_on_missing_referee && !missing_referee_uuids.empty?
+        raise MissingRefereeError.new "Required referee missing", missing_referee_uuids
+      end
+
+      event_json[:referee_id] = referee_ids
+
+      event = WPEvent::CustomPostTypes::Event.new **event_json
+      ref_data.values.select{|v| !v[:id].nil?}.each do |v|
+        event.add_referee(v[:id], v[:qualification])
+      end
+
+      event
     end
 
     private
+
+    # from {uuid: 1, q: '2'} we will get
+    # { 1 => {uuid: 1, id: 123, q: '2'} }
+    def referee_data event_json
+      return {} if !event_json[:referee_qualifications]
+      # from {uuid: 1, q: '2'} we need {id: 123, q: '2'}
+      data = {}
+      event_json[:referee_qualifications].each do |rq|
+        uuid = rq[:uuid]
+        data[uuid] = { uuid: uuid,
+                       id: @referee_cache.id_of_uuid(uuid),
+                       qualification: rq[:qualification] }
+      end
+      data
+    end
 
     # Get wp-ids of event-categories.
     # Raise MissingCategoryError if not found.
