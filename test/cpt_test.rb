@@ -123,12 +123,13 @@ class CPTTest < Minitest::Test
   end
 
   def test_custom_fields_hash
+    # obsolete?
     book = BookCPT.new price: '12.2', uuid: '1222'
     assert_equal([{key: 'price', value: '12.2'}, {key: 'uuid', value: '1222'}],
                  book.custom_fields_hash)
   end
 
-  def test_update
+  def test_integrate_field_ids
     old_book_data = { "post_id"     => "1066",    "post_title" => "Typs fr dummis",
                       "post_status" => "publish", "post_type"  => "book",
                       "post_name"   => "typs-fr-dummis", "post_content" => "",
@@ -145,6 +146,24 @@ class CPTTest < Minitest::Test
     assert_equal "522", book.field("price").id
     assert_equal "12.2", book.field("price").value
     assert_equal "12.2", book.price
+  end
+
+  def test_integrate_field_ids_multi
+    old_book_data = { "post_type"  => "book",
+                      "custom_fields" => [
+                        {"id" => "1", "key" => "author_id", "value" => "12"},
+                        {"id" => "2", "key" => "author_id", "value" => "13"},
+                      ]
+    }
+    old_book = BookCPT.from_content_hash old_book_data
+    book = BookCPT.new author_id: ['14']
+    book.integrate_field_ids old_book
+
+    assert_equal ['14'], book.author_id
+    asserted_fields = [{ :id => "1", :key => "author_id", :value => '14' },
+                       { :id => "2", :key => nil,         :value => '' } # deletion mark
+    ]
+    assert_equal asserted_fields, book.multi_field("author_id").map(&:to_hash)
   end
 
   def test_single_custom_field

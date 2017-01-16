@@ -72,9 +72,9 @@ module WPEvent
       # TODO recycle!
       self.class_eval("def #{field_key.to_s}=(new_value); @multi_fields['#{field_key.to_s}'] = new_value.map{|v| CustomFieldValue.new(nil, '#{field_key.to_s}', v)}; end")
       # def field_key
-      #   multi_field(field_key).map(&:value)
+      #   multi_field(field_key).map(&:value).compact
       # end
-      self.class_eval("def #{field_key.to_s}; return multi_field('#{field_key.to_s}').map(&:value); end")
+      self.class_eval("def #{field_key.to_s}; return multi_field('#{field_key.to_s}').map(&:value).compact; end")
 
       # Add field to @supported_(multi_)fields.
       # This is declared in the class, thus a kindof CLASS variable!
@@ -200,6 +200,8 @@ module WPEvent
       content
     end
 
+    # Sets (wp) ids of fields for which values are set.
+    # The ids are taken from other_entity (if available, left empty otherwise).
     def integrate_field_ids other_entity
       # new from old
       fields.values.each do |f|
@@ -210,6 +212,17 @@ module WPEvent
       #other_entity.fields.each do |f|
       #  field(f.key).id = f.id
       #end
+
+      @multi_fields.each do |field_name, mf|
+        ids = other_entity.multi_field(field_name).map(&:id)
+        mf.each do |mf_entry|
+          mf_entry.id = ids.delete_at(0) # keep order, use #pop otherwise
+        end
+        # If any ids left, delete these custom fields
+        ids.each do |id|
+          multi_field(field_name) << CustomFieldValue.new(id, nil, nil)
+        end
+      end
     end
 
     def is_multi_field?(field_name)
