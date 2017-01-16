@@ -6,8 +6,7 @@ class BookCPT < WPEvent::CustomPostType
   wp_custom_field_single "uuid"
   wp_custom_field_single "price"
   wp_post_content_alias  "description" # 'alias'
-  #wp_custom_field_multi  "author_id"
-  #wp_custom_field_multi  "author_uuid"
+  wp_custom_field_multi  "author_id"
 end
 
 class MovieCPT < WPEvent::CustomPostType
@@ -221,6 +220,17 @@ class CPTTest < Minitest::Test
     assert_equal false, book.in_wordpress?
   end
 
-  # test_multi_custom_field
-  # test_update
+  def test_multi_custom_field
+    book = BookCPT.new author_id: [1,2,3]
+    assert_equal [1,2,3], book.author_id
+    assert_equal(
+      [{key: 'author_id', value: 1},
+       {key: 'author_id', value: 2},
+       {key: 'author_id', value: 3},
+      ], book.to_content_hash[:custom_fields])
+  end
+
+  def test_multi_custom_field_from_hash
+   skip("nyi")
+  end
 end

@@ -19,10 +19,14 @@ module WPEvent
 
   # Base class to inherit from for Classes that map to Wordpress
   # Custom Post Types.
+  #
+  # Besides the post_id, title, content and featured_image (id) that
+  # define a post, the CustomPostType likely will own custom field
+  # values.  These are specified with wp_custom_field_single and wp_custom_field_multi (depending on their type).
   class CustomPostType
     attr_accessor :post_id, :title, :content, :featured_image_id
     # TODO fields later will need meta-meta-data, on an instance basis, too.
-    attr_accessor :fields
+    attr_accessor :fields, :multifields
 
     def self.wp_post_type(wp_post_type)
       # TODO syntax: define_method("....")
@@ -62,6 +66,27 @@ module WPEvent
       self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
     end
 
+    # Specify a field that will make and take a fine array.
+    def self.wp_custom_field_multi(field_key)
+      # def field_key=(new_value)
+      #   multi_field('field_key') = new_value.map{|v| CustomFieldValue.new(nil, 'field_key', v)}
+      # end
+      # TODO recycle!
+      self.class_eval("def #{field_key.to_s}=(new_value); @multi_fields['#{field_key.to_s}'] = new_value.map{|v| CustomFieldValue.new(nil, '#{field_key.to_s}', v)}; end")
+      # def field_key
+      #   multi_field(field_key).map(&:value)
+      # end
+      self.class_eval("def #{field_key.to_s}; return multi_field('#{field_key.to_s}').map(&:value); end")
+
+      # From here on we should differ
+      # Add field to @@fields_proto list
+      self.class_eval("(@@fields_proto ||= [])")
+      self.class_eval("@@fields_proto << '#{field_key}'")
+      # Add field to @supported_fields.
+      # This is declared in the class, thus a kindof CLASS variable!
+      self.class_eval("(@supported_fields ||= []) << '#{field_key}'")
+    end
+
     def self.wp_post_title_alias(title_alias)
       self.class_eval("alias :#{title_alias.to_sym}= :title=")
       self.class_eval("alias :#{title_alias.to_sym}  :title")
@@ -81,8 +106,13 @@ module WPEvent
       @fields.default_proc = proc do |hash, key|
         hash[key] = CustomFieldValue.new(nil, key, nil)
       end
+      @multi_fields = Hash.new
+      @multi_fields.default_proc = proc do |hash, key|
+        hash[key] = []
+      end
       kwargs.each do |k,v|
         if k == :title
+          # strip ?
           @title = v
         elsif k == :content
           @content = v
@@ -114,6 +144,11 @@ module WPEvent
       @fields[field_name]
     end
 
+    def multi_field(field_name)
+      @multi_fields[field_name]
+    end
+
+    # Returns list of field keys generally supported by this Custom Post Type
     def supported_fields
       self.class.instance_variable_get(:@supported_fields)
     end
@@ -144,7 +179,7 @@ module WPEvent
         post_data:     Time.now,
         post_title:    title    || '', # why does content need '@'?
         post_content:  @content || '',
-        custom_fields: @fields.map{|k,v| v.to_hash}
+        custom_fields: @fields.map{|k,v| v.to_hash} | @multi_fields.flat_map{|k,v| v.flat_map(&:to_hash)}
       }
       if featured_image_id
         content[:post_thumbnail] = featured_image_id.to_s
