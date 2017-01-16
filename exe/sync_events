@@ -80,19 +80,32 @@ rescue JSON::ParserError => e
   exit_with 5, "Input file could not be parsed."
 end
 
+event_cache    = WPEvent::EntityCache.new(WPEvent::EventPost)
 category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
 referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
 syncer = WPEvent::EventSyncer.new category_cache,
-  referee_cache, media_cache, image_uploader, raise_on_missing_referee: !options[:ignore_missing_referees]
+  referee_cache, image_uploader, raise_on_missing_referee: !options[:ignore_missing_referees]
+
+ng_syncer = WPEvent::Syncer.new image_uploader
+
+event_factory = WPEvent::EventFactory.new
 
 events.each_with_index do |event, idx|
   info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{event['uuid']}"
+
   begin
-    wp_event = WPEvent::EventPost.uuid_in_wordpress? event["uuid"]
-    syncer.create_or_update(wp_event, event)
+    # 'event' is the new data
+    wp_event_content = event_cache.in_mem_lookup event["uuid"]
+    debug "wp_event_content from cache is #{wp_event_content}"
+
+    event_from_json  = event_factory.from_json event # Now keys are symbols!
+    event_from_wp    = WPEvent::CustomPostTypes::Event.from_content_hash(wp_event_content)
+
+    ng_syncer.merge_push event_from_json, event_from_wp
+
   rescue WPEvent::MissingCategoryError => e
     exit_with 7, "A required category does not exist, aborting."
   rescue WPEvent::MissingRefereeError => e
