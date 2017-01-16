@@ -53,7 +53,7 @@ module WPEvent
       # def field_key=(new_value)
       #   field('field_key') = new_value.to_s.strip
       # end
-      self.class_eval("def #{field_key.to_s}=(new_value); field('#{field_key}').value = new_value.to_s.strip; end")
+      self.class_eval("def #{field_key.to_s}=(new_value); field('#{field_key.to_s}').value = new_value.to_s.strip; end")
       # def field_key
       #   field(field_key).value
       # end
@@ -135,11 +135,6 @@ module WPEvent
       @fields.values.map(&:to_hash)
     end
 
-    #def self.fields
-    #  self.class.class_variable_get(:@@fields_proto)
-    #  #self.class.class_variable_get(:@@fields_proto)
-    #end
-
     def field(field_name)
       @fields[field_name]
     end
@@ -150,9 +145,10 @@ module WPEvent
 
     # Returns list of field keys generally supported by this Custom Post Type
     def supported_fields
-      self.class.instance_variable_get(:@supported_fields)
+      self.class.supported_fields
     end
 
+    # Returns list of field keys generally supported by this Custom Post Type
     def self.supported_fields
       instance_variable_get(:@supported_fields)
     end
