@@ -161,7 +161,8 @@ class CPTTest < Minitest::Test
 
     assert_equal ['14'], book.author_id
     asserted_fields = [{ :id => "1", :key => "author_id", :value => '14' },
-                       { :id => "2", :key => nil,         :value => '' } # deletion mark
+                       # following is NOT present: ":key => nil, :value => '" to mark deletion
+                       { :id => "2"}
     ]
     assert_equal asserted_fields, book.multi_field("author_id").map(&:to_hash)
   end

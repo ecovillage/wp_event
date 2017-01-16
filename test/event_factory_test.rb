@@ -37,4 +37,22 @@ class EventFactoryTest < Minitest::Test
       event = event_factory.from_json from_json
     end
   end
+
+  def test_from_json_referee_qualification
+    from_json = {:uuid        => "8fac",
+                 :name        => "Bar",
+                 :description => "Bar open till 22h!",
+                 :referee_qualifications => [
+                   {qualification: 'Chef',     uuid: '123'},
+                   {qualification: 'Magician', uuid: '3'}
+                 ]}
+    event_factory = WPEvent::EventFactory.new
+    event_factory.referee_cache.define_singleton_method(:uuid_id_map) do
+      { '123' => '12' }
+    end
+
+    assert_raises WPEvent::MissingRefereeError do
+      event = event_factory.from_json from_json
+    end
+  end
 end
