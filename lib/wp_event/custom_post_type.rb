@@ -26,7 +26,7 @@ module WPEvent
   class CustomPostType
     attr_accessor :post_id, :title, :content, :featured_image_id
     # TODO fields later will need meta-meta-data, on an instance basis, too.
-    attr_accessor :fields, :multifields
+    attr_accessor :fields, :multi_fields
 
     def self.wp_post_type(wp_post_type)
       # TODO syntax: define_method("....")
