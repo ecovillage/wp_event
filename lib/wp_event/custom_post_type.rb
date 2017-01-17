@@ -34,9 +34,11 @@ module WPEvent
   # values.  These are specified with wp_custom_field_single and wp_custom_field_multi (depending on their type).
   class CustomPostType
     attr_accessor :post_id, :title, :content, :featured_image_id
-    # TODO fields later will need meta-meta-data, on an instance basis, too.
+    # TODO rename to single_fields?
     attr_accessor :fields, :multi_fields
 
+    # Define accessor method to the POST_TYPE (Class#post_type and
+    # Instance#post_type).
     def self.wp_post_type(wp_post_type)
       # TODO syntax: define_method("....")
 
@@ -90,11 +92,13 @@ module WPEvent
       self.class_eval("(@supported_multi_fields ||= []) << '#{field_key}'")
     end
 
+    # Alias the post_title getter and setter with another 'name'.
     def self.wp_post_title_alias(title_alias)
       self.class_eval("alias :#{title_alias.to_sym}= :title=")
       self.class_eval("alias :#{title_alias.to_sym}  :title")
     end
 
+    # Alias the post_content getter and setter with another 'name'.
     def self.wp_post_content_alias(content_alias)
       self.class_eval("alias :#{content_alias.to_sym}= :content=")
       self.class_eval("alias :#{content_alias.to_sym}  :content")
@@ -138,34 +142,48 @@ module WPEvent
       @fields.values.map(&:to_hash)
     end
 
+    # Access a CustomFieldValue that can hold a single value.
     def field(field_name)
       @fields[field_name]
     end
 
+    # Access a CustomFieldValue that can hold multiple values (array).
     def multi_field(field_name)
       @multi_fields[field_name]
     end
 
-    # Returns list of field keys generally supported by this Custom Post Type
+    # Returns list of field keys generally supported by this Custom Post Type.
     def supported_fields
       self.class.supported_fields
     end
 
-    # Returns list of field keys generally supported by this Custom Post Type
+    # Returns list of field keys generally supported by this Custom Post Type.
     def self.supported_fields
       supported_single_fields | supported_multi_fields
     end
 
+    # Returns list of single-valued field keys generally supported
+    # by this Custom Post Type.
     def self.supported_single_fields
       instance_variable_get(:@supported_single_fields) || []
     end
 
+    # Returns list of multiple-valued field keys generally supported
+    # by this Custom Post Type.
     def self.supported_multi_fields
       instance_variable_get(:@supported_multi_fields) || []
     end
 
+    # True iff supported fields include field_name
+    def has_custom_field? field_name
+      supported_fields.include? field_name
+    end
+
     # From a Hash as returned by RubyPress's getPost(s) method
     # populate and return a new CustomPostType-instance.
+    #
+    # Custom field values will be created as specified by
+    # the wp_custom_field_single/multi definitions.
     def self.from_content_hash content_hash
       return nil if content_hash.nil?
       entity = new(post_id: content_hash["post_id"],
