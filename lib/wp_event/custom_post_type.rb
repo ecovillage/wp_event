@@ -104,8 +104,20 @@ module WPEvent
       self.class_eval("alias :#{content_alias.to_sym}  :content")
     end
 
-    def has_custom_field? field_name
-      supported_fields.include? field_name
+    # This is an instance variable for the Class (not for instances of it)!
+    @additional_field_action = :ignore
+
+    # Define whether additional custom fields should be
+    #   :ignore -> ignored (default)
+    #   :delete -> marked for deletion
+    #   :add    -> added
+    # Other values for action will silently be ignored.
+    def self.additional_field_action(action)
+      self.class_eval("if [:ignore, :delete, :add].include?(:#{action}) ; @additional_field_action = :#{action}; end")
+    end
+
+    def additional_field_action
+      instance_variable_get(:@additional_field_action) || :ignore
     end
 
     def initialize **kwargs
