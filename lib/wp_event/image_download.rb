@@ -25,7 +25,13 @@ module WPEvent
         uri = URI.join(@image_source, rel_path)
         info "Downloading image file from #{uri}"
         WPEvent::Downloader::download!(uri, store_path)
-        info "Downloaded into #{store_path}"
+        size = File.size(store_path)/1000.0
+        info "Downloaded to #{store_path} (about #{size.to_i}K)."
+        if size < 1
+          error "Downloaded file seems to be empty"
+        elsif size < 50.0
+          warn "Very small image file"
+        end
       end
     end
 
