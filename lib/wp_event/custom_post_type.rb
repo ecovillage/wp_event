@@ -113,11 +113,14 @@ module WPEvent
     #   :add    -> added
     # Other values for action will silently be ignored.
     def self.additional_field_action(action)
-      self.class_eval("if [:ignore, :delete, :add].include?(:#{action}) ; @additional_field_action = :#{action}; end")
+      if [:ignore, :delete, :add].include? action.to_sym
+        # @additional_field_action = :action
+        self.class_eval("@additional_field_action = :#{action}")
+      end
     end
 
     def additional_field_action
-      instance_variable_get(:@additional_field_action) || :ignore
+      self.class.instance_variable_get(:@additional_field_action) || :ignore
     end
 
     def initialize **kwargs
@@ -145,7 +148,8 @@ module WPEvent
           #puts("#{k}=('#{v}')")
           #self.instance_eval("#{k} = '#{v}'")
           self.send(((k.to_s) + "=").to_sym, v)
-          #self.instance_eval "puts 'self.inseval: #{self}'"
+        elsif additional_field_action == :add
+          @fields[k.to_sym] = CustomFieldValue.new(nil, k.to_sym, v)
         end
       end
     end
@@ -239,18 +243,34 @@ module WPEvent
       content
     end
 
-    # Sets (wp) ids of fields for which values are set.
+    # When additional_field_action == :ignore (the default) sets (wp) ids
+    # of fields for which values are set.
+    #
+    # If additional_field_action == :add CustomFieldValues of other_entity are
+    # copied if not yet existing in this entity (otherwise only the id of
+    # the fields are set.
+    #
+    # Finally, if additional_field_action == :delete , mark the fields which
+    # are NOT set in this entity but in the other entity ready for deletion.
+    #
     # The ids are taken from other_entity (if available, left empty otherwise).
     def integrate_field_ids other_entity
+      # TODO rename and/or restructure this method
       # new from old
       fields.values.each do |f|
         f.id = other_entity.field(f.key).id
       end
 
-      # old to new
-      #other_entity.fields.each do |f|
-      #  field(f.key).id = f.id
-      #end
+      if additional_field_action == :add
+        # old to new
+        other_entity.fields.values.each do |f|
+          if !@fields.key?(f.key)
+            @fields[f.key] = f
+          end
+        end
+      else additional_field_action == :delete
+        raise Error
+      end
 
       @multi_fields.each do |field_name, mf|
         ids = other_entity.multi_field(field_name).map(&:id)

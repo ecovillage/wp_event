@@ -7,12 +7,24 @@ class BookCPT < WPEvent::CustomPostType
   wp_custom_field_single "price"
   wp_post_content_alias  "description" # 'alias'
   wp_custom_field_multi  "author_id"
+
+  additional_field_action :ignore
 end
 
 class MovieCPT < WPEvent::CustomPostType
   wp_post_type "movies"
   wp_post_title_alias    "name" # 'alias'
   wp_custom_field_single "year"
+
+  additional_field_action :delete
+end
+
+class BoardgameCPT < WPEvent::CustomPostType
+  wp_post_type "boardgames"
+  wp_post_title_alias    "name" # 'alias'
+  wp_custom_field_single "year"
+
+  additional_field_action :add
 end
 
 class CPTTest < Minitest::Test
@@ -303,5 +315,18 @@ class CPTTest < Minitest::Test
     book.set_field_id("author_id", "12", "912")
     assert_equal "912", book.multi_field("author_id")[0].id
     assert_equal nil,   book.multi_field("author_id")[1].id
+  end
+
+  def test_additional_field_action_add
+    dungeonlord = BoardgameCPT.new
+    assert dungeonlord.additional_field_action == :add
+
+    space_alert = BoardgameCPT.new fun: 'extreme'
+    assert_equal 'extreme', space_alert.field(:fun).value
+
+    space_alert.field(:fun).id = 10
+    dungeonlord.integrate_field_ids space_alert
+    assert_equal 'extreme', dungeonlord.field(:fun).value
+    assert_equal 10,        dungeonlord.field(:fun).id
   end
 end
