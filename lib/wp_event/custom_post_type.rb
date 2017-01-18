@@ -68,13 +68,13 @@ module WPEvent
     # Note that the accessor only wears strings and automatically strips
     def self.wp_custom_field_single(field_key)
       # def field_key=(new_value)
-      #   field('field_key') = new_value.to_s.strip
+      #   field!('field_key') = new_value.to_s.strip
       # end
-      self.class_eval("def #{field_key.to_s}=(new_value); field('#{field_key.to_s}').value = new_value.to_s.strip; end")
+      self.class_eval("def #{field_key.to_s}=(new_value); field!('#{field_key.to_s}').value = new_value.to_s.strip; end")
       # def field_key
-      #   field(field_key).value
+      #   field?(field_key).value
       # end
-      self.class_eval("def #{field_key.to_s}; return field('#{field_key.to_s}').value; end")
+      self.class_eval("def #{field_key.to_s}; return field?('#{field_key.to_s}').value; end")
 
       # Add field to @supported_(single_)fields.
       # This is declared in the class, thus a kindof CLASS variable!
@@ -131,9 +131,6 @@ module WPEvent
 
     def initialize **kwargs
       @fields = Hash.new
-      @fields.default_proc = proc do |hash, key|
-        hash[key] = CustomFieldValue.new(nil, key, nil)
-      end
       @multi_fields = Hash.new
       @multi_fields.default_proc = proc do |hash, key|
         hash[key] = []
@@ -164,9 +161,27 @@ module WPEvent
       @fields.values.map(&:to_hash)
     end
 
-    # Access a CustomFieldValue that can hold a single value.
-    def field(field_name)
-      @fields[field_name]
+    # Access the given field, reurns a NullCustomFieldValue if not found.
+    # The NullCustomFieldValue does not accept setting any values and
+    # returns nil for id, key and value.
+    #
+    # Use this to (readonly) access a field with given name.
+    def field?(field_name)
+      if @fields.key? field_name
+        @fields[field_name]
+      else
+        NullCustomFieldValue.new
+      end
+    end
+
+    # Access (or create) a CustomFieldValue that can hold a single value.
+    def field!(field_name)
+      # ||= would probably do, too.
+      if @fields.key? field_name
+        @fields[field_name]
+      else
+        @fields[field_name] = CustomFieldValue.new(nil, field_name, nil)
+      end
     end
 
     # Access a CustomFieldValue that can hold multiple values (array).
@@ -219,7 +234,7 @@ module WPEvent
           field = custom_fields_list.find{|f| f["key"] == field_key}
           if field
             entity.send("#{field_key}=".to_sym, field["value"])
-            entity.field(field_key).id = field["id"]
+            entity.field?(field_key).id = field["id"]
           end
         else
           fields = custom_fields_list.select{|f| f["key"] == field_key}
@@ -264,7 +279,7 @@ module WPEvent
       # TODO rename and/or restructure this method
       # new from old
       fields.values.each do |f|
-        f.id = other_entity.field(f.key).id
+        f.id = other_entity.field?(f.key).id
       end
 
       if additional_field_action == :add
@@ -312,7 +327,7 @@ module WPEvent
 
     def set_field_id field_key, field_value, field_id
       if is_single_field? field_key
-        field(field_key).id = field_id
+        field?(field_key).id = field_id
       else
         multi_field(field_key).find{|f| f.key == field_key && f.value == field_value}.id = field_id
       end

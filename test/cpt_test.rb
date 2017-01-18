@@ -155,8 +155,8 @@ class CPTTest < Minitest::Test
     book = BookCPT.new uuid: '1111-2222', title: 'Typos for dummies', price: "12.2"
     book.integrate_field_ids old_book
     assert_equal "Typos for dummies", book.title
-    assert_equal "522", book.field("price").id
-    assert_equal "12.2", book.field("price").value
+    assert_equal "522",  book.field?("price").id
+    assert_equal "12.2", book.field?("price").value
     assert_equal "12.2", book.price
   end
 
@@ -245,7 +245,7 @@ class CPTTest < Minitest::Test
     assert_equal "", book.content
     assert_equal "Typs fr dummis", book.title
     assert_equal "12.1", book.price
-    assert_equal "522", book.field("price").id
+    assert_equal "522",  book.field?("price").id
     assert_equal "1111-2222", book.uuid
     # TODO test thumbnail setting: "post_thumbnail" => []
   end
@@ -322,9 +322,9 @@ class CPTTest < Minitest::Test
     assert dungeonlord.additional_field_action == :add
 
     space_alert = BoardgameCPT.new fun: 'extreme'
-    assert_equal 'extreme', space_alert.field(:fun).value
+    assert_equal 'extreme', space_alert.field?(:fun).value
 
-    space_alert.field(:fun).id = 10
+    space_alert.field?(:fun).id = 10
     dungeonlord.integrate_field_ids space_alert
     assert_equal 'extreme', dungeonlord.field(:fun).value
     assert_equal 10,        dungeonlord.field(:fun).id
