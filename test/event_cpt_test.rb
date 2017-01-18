@@ -31,4 +31,18 @@ class EventCPTTest < Minitest::Test
     content.delete(:post_data)
     assert_equal asserted_content, content
   end
+
+  def test_referee_qa_field_id_recycling
+    event = WPEvent::CustomPostTypes::Event.new
+    event.add_referee('12', 'Magician')
+    #other_event
+    asserted_content = { post_type: "ev7l-event",
+                         post_status: "publish",
+                         post_title: "",
+                         post_content: "",
+                         custom_fields: [{:key=>"referee_12_qualification", :value=>"Magician"}]}
+    content = event.to_content_hash
+    content.delete(:post_data)
+    assert_equal asserted_content, content
+  end
 end
