@@ -326,7 +326,40 @@ class CPTTest < Minitest::Test
 
     space_alert.field?(:fun).id = 10
     dungeonlord.integrate_field_ids space_alert
-    assert_equal 'extreme', dungeonlord.field(:fun).value
-    assert_equal 10,        dungeonlord.field(:fun).id
+    assert_equal 'extreme', dungeonlord.field?(:fun).value
+    assert_equal 10,        dungeonlord.field?(:fun).id
+    # to_content_hash?
+  end
+
+  def test_additional_field_action_delete
+    movie = MovieCPT.new name: 'Menula One', miles: '200'
+    assert_equal nil, movie.field?(:miles).value
+
+    content_hash = { "post_type"     => "movie",
+                     "custom_fields" => [
+                       {"id" => "22", "key" => "miles", "value" => "2"},
+                       {"key" => "year", "value" => "2007"},
+                     ]}
+    other_movie = MovieCPT.from_content_hash content_hash
+    assert_equal nil,    other_movie.field?("miles").value
+    assert_equal "2007", other_movie.field?("year").value
+
+    other_movie.field!("miles").id    = '100'
+    other_movie.field!("miles").key   = 'miles'
+    other_movie.field!("miles").value = '1000 miles'
+
+    assert_equal '1000 miles', other_movie.field?('miles').value
+    assert_equal '100',        other_movie.field?('miles').id
+    assert_equal 'miles',      other_movie.field?('miles').key
+
+    movie.integrate_field_ids other_movie
+    # This field is marked for deletion now
+    assert_equal '100', movie.field?('miles').id
+    assert_equal nil,   movie.field?('miles').key
+    assert_equal nil,   movie.field?('miles').value
+  end
+
+  def test_additional_field_action_ignore
+    skip "Not yet implemented"
   end
 end

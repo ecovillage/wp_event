@@ -286,8 +286,13 @@ module WPEvent
             @fields[f.key] = f
           end
         end
-      else additional_field_action == :delete
-        raise Error
+      elsif additional_field_action == :delete
+        other_entity.fields.values.each do |f|
+          if !@fields.key?(f.key)
+            # This field will be deleted when used to edit Post
+            @fields[f.key] = CustomFieldValue.new(f.id, nil, nil)
+          end
+        end
       end
 
       @multi_fields.each do |field_name, mf|
