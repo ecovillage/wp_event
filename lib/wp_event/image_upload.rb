@@ -20,9 +20,9 @@ module WPEvent
 
     def create_data
       {
-        name: @file_path,
+        name: File.basename(@file_path),
         type: MIME::Types.type_for(file_path).first.to_s,
-        post_id: @post_id,
+        post_id: @post_id || '',
         bits: XMLRPC::Base64.new(IO.read file_path)
       }
     end
