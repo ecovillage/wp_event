@@ -81,12 +81,12 @@ referees.each_with_index do |referee, idx|
   # This **could** be done directly while parsing the json:
   #   x = JSON.parse json, symbolize_names: true
   referee.keys.each do |key|
-      referee[(key.to_sym rescue key) || key] = referee.delete(key)
+    referee[(key.to_sym rescue key) || key] = referee.delete(key)
   end
 
   debug "Referee from cache: #{wp_referee}"
 
-  syncer.create_or_update WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee), referee
+  syncer.merge_push WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee), WPEvent::CustomPostTypes::Referee.new(**referee)
 end
 
 exit 0
