@@ -104,6 +104,9 @@ events.each_with_index do |event, idx|
     event_from_json  = event_factory.from_json event # Now keys are symbols!
     event_from_wp    = WPEvent::CustomPostTypes::Event.from_content_hash(wp_event_content)
 
+    attachment_id = image_uploader.process(event[:image_url])
+    event_from_json.featured_image_id = attachment_id
+
     ng_syncer.merge_push event_from_json, event_from_wp
 
   rescue WPEvent::MissingCategoryError => e
