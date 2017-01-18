@@ -147,9 +147,6 @@ module WPEvent
           @featured_image_id = v
         # Better: has_custom_field?
         elsif respond_to?(k.to_sym)
-          #puts "respond to #{k}->setting!"
-          #puts("#{k}=('#{v}')")
-          #self.instance_eval("#{k} = '#{v}'")
           self.send(((k.to_s) + "=").to_sym, v)
         elsif additional_field_action == :add
           @fields[k.to_sym] = CustomFieldValue.new(nil, k.to_sym, v)
