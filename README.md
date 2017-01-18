@@ -164,9 +164,16 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ### Design and decisions
 
-This section is written without great care and will receive love once things settled.
+This section is written **without great care and will receive love __once things settled__**.
 
-Aim is to not reimplement ActiveRecord and work in agile fashion with intermediate cleanups in between.
+Aim is to not to re-implement ActiveRecord or Roar but to have a tailored solution for off-the-beat wordpress Custom Post Type post updates (and creations).
+
+We deal with three separate abstraction layers of entities (which correspond to Wordpress Posts of a Custom Post Type).  On example of `Event`:
+
+  - the **post** `lib/wp_event/event_post.rb` handles
+
+
+#### History
 
 We deal with three separate abstraction layers of entities (which correspond to Wordpress Posts of a Custom Post Type).  On example of `Event`:
 
