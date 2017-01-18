@@ -5,10 +5,18 @@ module WPEvent
     class CouchEvent
       attr_accessor :title, :description,
         :from, :to, :category_names, :uuid,
+        :arrival, :departure, :current_infos, :costs_participation,
+        :costs_catering, :info_housing, :participants_prerequisites,
+        :participants_please_bring,
         :document, :referee_and_qualifications,
-        :image_url
+        :image_url, :timestamp
 
-      def initialize uuid, title, description, from, to, category_names, referee_and_qualifications, document=nil, image_url=nil
+      def initialize uuid: nil, title: nil, description: nil, from: nil,
+        to: nil, category_names: nil, referee_and_qualifications: nil,
+        arrival: nil, departure: nil, current_infos: nil,
+        costs_participation: nil, costs_catering: nil, info_housing: nil,
+        participants_prerequisites: nil, participants_please_bring: nil,
+        image_url: nil, timestamp: DateTime.now, document: nil
         @uuid        = uuid
         @title       = title
         @description = description
@@ -18,23 +26,40 @@ module WPEvent
         @referee_and_qualifications = referee_and_qualifications
         @document    = document
         @image_url   = image_url
+        @timestamp   = timestamp
+        @arrival     = arrival
+        @departure   = departure
+        @current_infos = current_infos
+        @costs_participation = costs_participation
+        @costs_catering = costs_catering
+        @info_housing = info_housing
+        @participants_prerequisites = participants_prerequisites
+        @participants_please_bring = participants_please_bring
       end
 
+      # From
+      #   "referees" => [ {"qualification"=>".q.", "can_talk_to"=>true, "l_booking"=>"...", "l_person"=>"luuid", l_reservation"=>"..." } ]
+      #   return: [{referee_uuid: 'luuid', qualification: '.q.']
       def self.extract_referees document
         referee_doc = document.dig('g_value', 'referees') || []
         referee_doc.map{|ref| {qualification: ref["qualification"], uuid: ref['l_person']}}
       end
 
       def self.from_couch_doc document
-        WPEvent::CouchImport::CouchEvent.new document["_id"],
-          document.dig("g_value", "title"),
-          document.dig("g_value", "description_long"),
-          Date.strptime(document.dig("g_value", "date_from"), "%d.%m.%Y"),
-          Date.strptime(document.dig("g_value", "date_to"),   "%d.%m.%Y"),
-          document.dig("g_value", "categories"),
-          extract_referees(document),
-          document,
-          document.dig("g_value", "thumbnail")
+        WPEvent::CouchImport::CouchEvent.new uuid: document["_id"],
+          title: document.dig("g_value", "title"),
+          description: document.dig("g_value", "description_long"),
+          to: Date.strptime(document.dig("g_value", "date_from"), "%d.%m.%Y"),
+          from: Date.strptime(document.dig("g_value", "date_to"),   "%d.%m.%Y"),
+          category_names: document.dig("g_value", "categories"),
+          referee_and_qualifications: extract_referees(document),
+          arrival: web_notice_array_val(document, "arrival"),
+          departure: web_notice_array_val(document, "departure"),
+          costs_catering: web_notice_array_val(document, "cost_housing"),
+          costs_participation: web_notice_array_val(document, "costs_participation"),
+          image_url: document.dig("g_value", "thumbnail"),
+          document: document,
+          timestamp: Time.at(document.dig("g_timestamp").to_i).to_datetime
       end
 
       def self.pull_from_couchdb uuid
@@ -61,6 +86,17 @@ module WPEvent
         end
       end
 
+      def self.web_notice_array_val document, field
+        notices = document.dig("g_value", "web_notice_array")
+        return nil if notices.nil?
+
+        notice = notices.find{|n| n["field"] == field}
+        #&WPEvent::CouchImport::Lambdas.web_notice_array_find(field)
+        return nil if notice.nil?
+
+        notice["text"]
+      end
+
       def to_json *a
         { uuid:           @uuid,
           name:           @title,
@@ -69,7 +105,16 @@ module WPEvent
           todate:         @to,
           category_names: @category_names,
           referee_qualifications: @referee_and_qualifications,
-          image_url:      @image_url
+          image_url:      @image_url,
+          arrival:        @arrival,
+          departure:      @departure,
+          current_infos:  @current_infos,
+          costs_participation: @costs_participation,
+          costs_catering: @costs_catering,
+          info_housing:   @info_housing,
+          participants_please_bring: @participants_please_bring,
+          participants_prerequisites: @participants_prerequisites,
+          timestamp:      @timestamp
         }.to_json(*a)
       end
     end
