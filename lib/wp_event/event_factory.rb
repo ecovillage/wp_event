@@ -15,7 +15,7 @@ module WPEvent
 
     def initialize raise_on_missing_referee: true
       @category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
-      @referee_cache  = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+      @referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
       @raise_on_missing_referee = raise_on_missing_referee
     end
 
@@ -65,7 +65,7 @@ module WPEvent
         uuid = rq["uuid"]
         data[uuid] = { uuid: uuid,
                        id: @referee_cache.id_of_uuid(uuid),
-                       qualification: rq[:qualification] }
+                       qualification: rq["qualification"] }
       end
       data
     end
