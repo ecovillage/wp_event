@@ -26,6 +26,12 @@ module WPEvent
     end
   end
 
+  class NullCustomFieldValue
+    def id; nil; end
+    def key; nil; end
+    def value; nil; end
+  end
+
   # Base class to inherit from for Classes that map to Wordpress
   # Custom Post Types.
   #
