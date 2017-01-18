@@ -81,17 +81,12 @@ rescue JSON::ParserError => e
 end
 
 event_cache    = WPEvent::EntityCache.new(WPEvent::EventPost)
-category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
-referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
 media_cache    = WPEvent::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::EventSyncer.new category_cache,
-  referee_cache, image_uploader, raise_on_missing_referee: !options[:ignore_missing_referees]
+syncer = WPEvent::Syncer.new image_uploader
 
-ng_syncer = WPEvent::Syncer.new image_uploader
-
-event_factory = WPEvent::EventFactory.new
+event_factory = WPEvent::EventFactory.new raise_on_missing_referee: !options[:ignore_missing_referees]
 
 events.each_with_index do |event, idx|
   info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{event['uuid']}"
@@ -107,7 +102,7 @@ events.each_with_index do |event, idx|
     attachment_id = image_uploader.process(event[:image_url])
     event_from_json.featured_image_id = attachment_id
 
-    ng_syncer.merge_push event_from_json, event_from_wp
+    syncer.merge_push event_from_json, event_from_wp
 
   rescue WPEvent::MissingCategoryError => e
     exit_with 7, "A required category does not exist, aborting."
