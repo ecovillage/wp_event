@@ -43,7 +43,7 @@ class EventFactoryTest < Minitest::Test
                  :name        => "Bar",
                  :description => "Bar open till 22h!",
                  :referee_qualifications => [
-                   {qualification: 'Chef',     uuid: '123'},
+                   {'qualification' => 'Chef',     'uuid' => '123'},
                  ]}
     event_factory = WPEvent::EventFactory.new
     event_factory.referee_cache.define_singleton_method(:uuid_id_map) do
@@ -51,7 +51,7 @@ class EventFactoryTest < Minitest::Test
     end
 
     event = event_factory.from_json from_json
-    assert_equal 'Chef', event.field('referee_12_qualification').value
+    assert_equal 'Chef', event.field?('referee_12_qualification').value
 
     from_json = {:uuid        => "8fac",
                  :name        => "Bar",
