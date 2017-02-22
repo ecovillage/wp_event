@@ -2,7 +2,7 @@
 
 Ruby scripts to populate siebenlinden.org wordpress installation with event, referee and event category data.  The companion for the [ev7l-events Wordpress Plugin](https://github.com/ecovillage/ev7l-events).
 
-Licensed under the GPLv3+, Copyright 2016 Felix Wolfsteller.
+Licensed under the GPLv3+, Copyright 2016, 2017 Felix Wolfsteller.
 
 ## Installation
 
