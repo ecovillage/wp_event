@@ -56,7 +56,7 @@ An example usage might look like
                --referees   "Felix Wolfsteller" \
                --description "Rather long text, <em>with</em> markup ..."
 
-#### export an event
+#### export an event from the Wordpress installation
 
 `wp_event --export --id 2`
 
@@ -205,6 +205,12 @@ Legacy data is imported via an `export` to json in our example.
 The `CouchImporter` does bulk mapping of couchdb documents to `couch_\<entity\>` classes like `CouchEvent` (which then do the mapping themselves).
 
 The `CouchDB` module deals with picking up data from specific views (or documents).
+
+## Lessons learned
+
+It looks as if Custom field (metadata) values are stripped by wordpress upon insertion ("here be spaces     " becomes "here be spaces").
+
+A relatively hard-to-debug "TypeError: wrong argument type String (expected Symbol)" is thrown when you try to initialize a CustomPostType with a hash that contains String (not symbol) keys.
 
 ## Contributing
 
