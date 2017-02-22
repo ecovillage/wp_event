@@ -166,7 +166,11 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 This section is written **without great care and will receive love __once things settled__**.
 
-Aim is to not to re-implement ActiveRecord or Roar but to have a tailored solution for off-the-beat wordpress Custom Post Type post updates (and creations).
+Parts have been written in [doc/custom_post_types](doc/custom_post_types).
+
+Aim is to not to re-implement [ActiveRecord]() or [Roar]() but to have a tailored solution for off-the-beat wordpress Custom Post Type post updates (and creations).
+
+At the end of the day, WPEvent is used to pass a hash to [rubypress](), which bloats it into a xmlrpc blob to be fired towards your wordpress installation.
 
 We deal with three separate abstraction layers of entities (which correspond to Wordpress Posts of a Custom Post Type).  On example of `Event`:
 
