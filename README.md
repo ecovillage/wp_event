@@ -114,7 +114,7 @@ Consumes a JSON file with events like this
       }
     ]
 
-and change corresponding data (identified by the UUID) in the wordpress instance.
+and change corresponding data (identified by the UUID) in the wordpress instance.  There are many more relevant fields (call with `--help` to see them).
 
 ### sync_referees
 
