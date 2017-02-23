@@ -15,7 +15,7 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of events with events registered in wordpress instance.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}]).
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}], arrival:, departure:, current_infos:, info_housing:, costs_participation:, costs_catering:, registration_needed:, participants_please_bring:, participants_prerequisites:).
     Alternatively, will read from STDIN.
     Will exit with 0 on success
 
@@ -107,9 +107,8 @@ events.each_with_index do |event, idx|
   rescue WPEvent::MissingCategoryError => e
     exit_with 7, "A required category does not exist, aborting."
   rescue WPEvent::MissingRefereeError => e
-    # More info: ..
-    #exit_with 8, "A required referee (in #{event_json['referee_qualifications'].map{|r| r["uuid"]}}) does not exist, aborting."
-    exit_with 8, "A required referee (in uuids: #{e.missing_referees}) does not exist, aborting."
+    exit_with 8, "A required referee (in uuids: #{e.missing_referees})"\
+                 " does not exist, aborting."
   end
 end
 
