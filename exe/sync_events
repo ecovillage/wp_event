@@ -15,7 +15,7 @@ option_parser = OptionParser.new do |opts|
 
     Sync a list of events with events registered in wordpress instance.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}], arrival:, departure:, current_infos:, info_housing:, costs_participation:, costs_catering:, registration_needed:, participants_please_bring:, participants_prerequisites:).
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}], arrival:, departure:, current_infos:, info_housing:, costs_participation:, costs_catering:, registration_needed:, cancel_conditions:, participants_please_bring:, participants_prerequisites:).
     Alternatively, will read from STDIN.
     Will exit with 0 on success
 
