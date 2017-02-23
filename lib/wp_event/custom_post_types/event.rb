@@ -22,6 +22,8 @@ module WPEvent
       wp_custom_field_single 'info_housing'
       wp_custom_field_single 'participants_please_bring'
       wp_custom_field_single 'participants_prerequisites'
+      wp_custom_field_single 'registration_needed'
+
 
       def initialize(**kwargs)
         super(**kwargs)

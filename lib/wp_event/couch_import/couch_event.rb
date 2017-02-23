@@ -7,7 +7,7 @@ module WPEvent
         :from, :to, :category_names, :uuid,
         :arrival, :departure, :current_infos, :costs_participation,
         :costs_catering, :info_housing, :participants_prerequisites,
-        :participants_please_bring,
+        :participants_please_bring, :registration_needed,
         :document, :referee_and_qualifications,
         :image_url, :timestamp
 
@@ -16,7 +16,7 @@ module WPEvent
         arrival: nil, departure: nil, current_infos: nil,
         costs_participation: nil, costs_catering: nil, info_housing: nil,
         participants_prerequisites: nil, participants_please_bring: nil,
-        image_url: nil, timestamp: DateTime.now, document: nil
+        image_url: nil, registration_needed: true, timestamp: DateTime.now, document: nil
         @uuid        = uuid
         @title       = title
         @description = description
@@ -35,6 +35,7 @@ module WPEvent
         @info_housing = info_housing
         @participants_prerequisites = participants_prerequisites
         @participants_please_bring = participants_please_bring
+        @registration_needed = registration_needed
       end
 
       # From
@@ -56,7 +57,9 @@ module WPEvent
           arrival: web_notice_array_val(document, "arrival"),
           departure: web_notice_array_val(document, "departure"),
           costs_catering: web_notice_array_val(document, "cost_housing"),
-          costs_participation: web_notice_array_val(document, "costs_participation"),
+          info_housing: web_notice_array_val(document, "housing"),
+          costs_participation: web_notice_array_val(document, "cost_seminar"),
+          registration_needed: document.dig("g_value", "registration_needed"),
           image_url: document.dig("g_value", "thumbnail"),
           document: document,
           timestamp: Time.at(document.dig("g_timestamp").to_i).to_datetime
@@ -114,6 +117,7 @@ module WPEvent
           info_housing:   @info_housing,
           participants_please_bring: @participants_please_bring,
           participants_prerequisites: @participants_prerequisites,
+          registration_needed: @registration_needed,
           timestamp:      @timestamp
         }.to_json(*a)
       end
