@@ -6,6 +6,7 @@ require 'json'
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
+extend WPEvent::CLI::Tool
 
 options = {}
 
