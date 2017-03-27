@@ -51,34 +51,21 @@ WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
 
 debug "Starting event sync (#{WPEvent::VERSION})"
 
-if ARGV.length != 1 && STDIN.tty?
-  STDERR.puts "Please provide json input file or pipe into me."
-  puts option_parser
-  exit 1
-end
-
 begin
   WPEvent.load_conf
 rescue Errno::ENOENT
   exit_with 3, "Config file (wp_event.conf) not found."
 end
 
-if (STDIN.tty? && ARGV.length == 1) && !File.exist?(ARGV[0])
-  exit_with 4, "Input file does not exist!"
-end
-
-#if !STDIN.tty?
-#  ARGV[0] = STDIN
-#end
-
 begin
-  # File.read or ARGF
-  input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
-  json = input.read
+  io = input_stream_or_exit
+  json = io.read
   events = JSON.parse json
+rescue WPEvent::CLI::Tool::InputArgumentError => e
+  exit_with 7, "#{e.message}"
 rescue JSON::ParserError => e
   debug $!
-  exit_with 5, "Input file could not be parsed."
+  exit_with 5, "Input could not be parsed (valid json?)."
 end
 
 event_cache    = WPEvent::EntityCache.new(WPEvent::EventPost)

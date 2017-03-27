@@ -28,6 +28,9 @@ module WPEvent
     module Tool
       include WPEvent::CLI::Logging
 
+      class InputArgumentError < StandardError
+      end
+
       def exit_on_arg_and_outfile! argv, options
         if ARGV.length == 1 && options[:outfile]
           exit_with 1, "Cannot specify both --outfile and argument"
@@ -51,6 +54,28 @@ module WPEvent
           end
           File.open(out, 'w')
         end
+      end
+
+      # Returns either the IO representing input (opening last argument
+      # as file, if needed), or throws an InputArgumentError (might get
+      # a different name in near future).
+      def input_stream_or_exit
+
+        if ARGV.length != 1 && STDIN.tty?
+          # No input argument and STDIN is terminal.
+          raise InputArgumentError.new("Please provide json input file path or pipe into me.")
+        end
+
+        if (ARGV.length == 1) && !File.exist?(ARGV[0])
+          raise InputArgumentError.new("Input file does not exist!")
+        end
+
+        #if !STDIN.tty?
+        #  ARGV[0] = STDIN
+        #end
+
+        input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
+        #json = input.read
       end
     end
   end
