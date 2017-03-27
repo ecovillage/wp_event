@@ -146,7 +146,7 @@ elsif options[:from] && options[:to]
   end
 
 else
-  exit_with 5, "No simple default behaviour specified"
+  exit_with 5, "Please specify either --from and --to, or --uuid"
 end
 
 exit 0
