@@ -13,7 +13,7 @@ extend WPEvent::CLI::Logging
 extend WPEvent::CLI
 extend WPEvent::CLI::Tool
 
-options = {}
+options = {pretty_print: true}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
@@ -46,7 +46,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-o", "--outfile FILE", "File to write data (json) to, fails if file exists, omit this option and the JSONFILE argument to write to STDOUT") do |o|
     options[:outfile] = o
   end
-  opts.on("-p", "--pretty-print", "Pretty print the generated json data") do |p|
+  opts.on("-p", "--[no-]pretty-print", "Pretty print the generated json data (default: true)") do |p|
     options[:pretty_print] = p
   end
 
