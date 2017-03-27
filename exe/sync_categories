@@ -52,6 +52,11 @@ rescue Errno::ENOENT
   exit_with 3, "Config file (wp_event.conf) not found."
 end
 
+category_cache  = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+media_cache    = WPEvent::MediaLibraryCache.new
+image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
+syncer = WPEvent::Syncer.new image_uploader
+
 categories = JSON.parse File.read(ARGV[0])
 
 categories.each do |category|
