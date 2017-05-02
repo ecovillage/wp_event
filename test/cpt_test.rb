@@ -310,11 +310,11 @@ class CPTTest < Minitest::Test
     }
     book = BookCPT.from_content_hash content_hash
     assert_equal "522", book.multi_field("author_id")[0].id
-    assert_equal nil,   book.multi_field("author_id")[1].id
+    assert_nil   book.multi_field("author_id")[1].id
 
     book.set_field_id("author_id", "12", "912")
     assert_equal "912", book.multi_field("author_id")[0].id
-    assert_equal nil,   book.multi_field("author_id")[1].id
+    assert_nil   book.multi_field("author_id")[1].id
   end
 
   def test_additional_field_action_add
@@ -333,7 +333,7 @@ class CPTTest < Minitest::Test
 
   def test_additional_field_action_delete
     movie = MovieCPT.new name: 'Menula One', miles: '200'
-    assert_equal nil, movie.field?(:miles).value
+    assert_nil movie.field?(:miles).value
 
     content_hash = { "post_type"     => "movie",
                      "custom_fields" => [
@@ -341,7 +341,7 @@ class CPTTest < Minitest::Test
                        {"key" => "year", "value" => "2007"},
                      ]}
     other_movie = MovieCPT.from_content_hash content_hash
-    assert_equal nil,    other_movie.field?("miles").value
+    assert_nil    other_movie.field?("miles").value
     assert_equal "2007", other_movie.field?("year").value
 
     other_movie.field!("miles").id    = '100'
@@ -355,8 +355,8 @@ class CPTTest < Minitest::Test
     movie.integrate_field_ids other_movie
     # This field is marked for deletion now
     assert_equal '100', movie.field?('miles').id
-    assert_equal nil,   movie.field?('miles').key
-    assert_equal nil,   movie.field?('miles').value
+    assert_nil    movie.field?('miles').key
+    assert_nil    movie.field?('miles').value
   end
 
   def test_additional_field_action_ignore
