@@ -359,7 +359,7 @@ class CPTTest < Minitest::Test
     assert_nil    movie.field?('miles').value
   end
 
-  def test_diff
+  def test_diff_one_field
     movie_one = MovieCPT.new name: 'Menula One', year: '2008'
     movie_two = MovieCPT.new name: 'Menula One'
 
@@ -370,6 +370,31 @@ class CPTTest < Minitest::Test
 
     asserted_diff = {'year' => [nil,'2008']}
     assert_equal asserted_diff, movie_two.diff(movie_one)
+
+    movie_two.year = '2010'
+    asserted_diff = {'year' => ['2008', '2010']}
+    assert_equal asserted_diff, movie_one.diff(movie_two)
+  end
+
+  def test_diff_two_fields
+    movie_one = MovieCPT.new name: 'Menula One', year: '2008'
+    movie_two = MovieCPT.new name: 'Menula One', year: '2010'
+
+    asserted_diff = {'year' => ['2008', '2010']}
+    assert_equal asserted_diff, movie_one.diff(movie_two)
+
+    book_one = BookCPT.new author_id: [1,2,3]
+    book_two = BookCPT.new author_id: [1,2]
+    asserted_diff = {'author_id' => [[1,2,3],[1,2]]}
+    assert_equal asserted_diff, book_one.diff(book_two)
+  end
+
+  def test_diff_builtin_values
+    movie_one = MovieCPT.new name: 'Menula One', year: '2008'
+    movie_two = MovieCPT.new name: 'Menula Two', year: '2010'
+
+    asserted_diff = {'year' => ['2008', '2010'], 'title' => ['Menula One', 'Menula Two']}
+    assert_equal asserted_diff, movie_one.diff(movie_two)
   end
 
   def test_additional_field_action_ignore

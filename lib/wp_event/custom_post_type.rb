@@ -346,11 +346,37 @@ module WPEvent
     # Returns empty hash to signalize equaliness.
     def diff(other_cpt_object)
       diff_fields = {}
+      # Fields exclusive to this one.
       (@fields.keys - other_cpt_object.fields.keys).each do |f|
         diff_fields[f] = [@fields[f].value, nil]
       end
+      # Fields exclusive to the other.
       (other_cpt_object.fields.keys - @fields.keys).each do |f|
         diff_fields[f] = [nil, other_cpt_object.fields[f].value]
+      end
+      # Mutual fields
+      (@fields.keys | other_cpt_object.fields.keys).each do |f|
+        field_value = field?(f).value
+        other_field_value = other_cpt_object.field?(f).value
+        if other_field_value != field_value
+          diff_fields[f] = [field_value, other_field_value]
+        end
+      end
+      # Multi-Fields exclusive to this one.
+      (@multi_fields.keys - other_cpt_object.multi_fields.keys).each do |f|
+        diff_fields[f] = [@multi_fields[f].value, nil]
+      end
+      # Multi-Fields exclusive to the other.
+      (other_cpt_object.multi_fields.keys - @multi_fields.keys).each do |f|
+        diff_fields[f] = [nil, other_cpt_object.multi_fields[f].value]
+      end
+      # Mutual Multi-fields
+      (@multi_fields.keys | other_cpt_object.multi_fields.keys).each do |f|
+        field_values = multi_field(f).map(&:value).compact
+        other_field_values = other_cpt_object.multi_field(f).map(&:value).compact
+        if other_field_values != field_values
+          diff_fields[f] = [field_values, other_field_values]
+        end
       end
       diff_fields
     end
