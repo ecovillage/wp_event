@@ -30,6 +30,10 @@ option_parser = OptionParser.new do |opts|
     options[:image_store] = s
   end
 
+  opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run") do |d|
+    options[:show_diff_only] = d
+  end
+
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -77,11 +81,12 @@ syncer = WPEvent::Syncer.new image_uploader
 event_factory = WPEvent::EventFactory.new raise_on_missing_referee: !options[:ignore_missing_referees]
 
 events.each_with_index do |event, idx|
-  info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{event['uuid']}"
+  uuid = event['uuid']
+  info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{uuid}"
 
   begin
     # 'event' is the new data
-    wp_event_content = event_cache.in_mem_lookup event["uuid"]
+    wp_event_content = event_cache.in_mem_lookup uuid
     debug "wp_event_content from cache is #{wp_event_content}"
 
     event_from_json  = event_factory.from_json event # Now keys are symbols!
@@ -90,7 +95,17 @@ events.each_with_index do |event, idx|
     attachment_id = image_uploader.process(event[:image_url])
     event_from_json.featured_image_id = attachment_id
 
-    syncer.merge_push event_from_json, event_from_wp
+    if options[:show_diff_only]
+      diffs = event_from_json.diff(event_from_wp)
+      if !diffs.empty?
+        info "Differences for #{uuid} (local/remote)"
+        info "  #{event_from_json.diff(event_from_wp)}"
+      else
+        info "#{uuid} is current."
+      end
+    else
+      syncer.merge_push event_from_json, event_from_wp
+    end
 
   rescue WPEvent::MissingCategoryError => e
     exit_with 7, "A required category does not exist, aborting."
