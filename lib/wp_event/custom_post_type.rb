@@ -1,4 +1,5 @@
 module WPEvent
+  # Describe a Custom Field Value with optionally an id (corresponding to the WordPress data).
   class CustomFieldValue
     attr_accessor :id, :key, :value
 
@@ -26,6 +27,7 @@ module WPEvent
     end
   end
 
+  # CustomField NullValue Object.
   class NullCustomFieldValue
     def id; nil; end
     def key; nil; end
@@ -38,6 +40,8 @@ module WPEvent
   # Besides the post_id, title, content and featured_image (id) that
   # define a post, the CustomPostType likely will own custom field
   # values.  These are specified with wp_custom_field_single and wp_custom_field_multi (depending on their type).
+  #
+  # To loop over the fields, use @fields and @multi_fields.
   class CustomPostType
     attr_accessor :post_id, :title, :content, :featured_image_id
     # TODO rename to single_fields?
@@ -158,7 +162,7 @@ module WPEvent
       @fields.values.map(&:to_hash)
     end
 
-    # Access the given field, reurns a NullCustomFieldValue if not found.
+    # Access the given field, returns a NullCustomFieldValue if not found.
     # The NullCustomFieldValue does not accept setting any values and
     # returns nil for id, key and value.
     #
@@ -343,7 +347,6 @@ module WPEvent
     def diff(other_cpt_object)
       diff_fields = {}
       (@fields.keys - other_cpt_object.fields.keys).each do |f|
-        puts "FIELD: #{f}"
         diff_fields[f] = [@fields[f].value, nil]
       end
       (other_cpt_object.fields.keys - @fields.keys).each do |f|
