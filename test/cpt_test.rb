@@ -359,7 +359,21 @@ class CPTTest < Minitest::Test
     assert_nil    movie.field?('miles').value
   end
 
+  def test_diff
+    movie_one = MovieCPT.new name: 'Menula One', year: '2008'
+    movie_two = MovieCPT.new name: 'Menula One'
+
+    assert_equal({}, movie_one.diff(movie_one))
+
+    asserted_diff = {'year' => ['2008', nil]}
+    assert_equal asserted_diff, movie_one.diff(movie_two)
+
+    asserted_diff = {'year' => [nil,'2008']}
+    assert_equal asserted_diff, movie_two.diff(movie_one)
+  end
+
   def test_additional_field_action_ignore
     skip "Not yet implemented"
   end
+
 end

@@ -329,10 +329,27 @@ module WPEvent
 
     def set_field_id field_key, field_value, field_id
       if is_single_field? field_key
+        # ????!! field!
         field?(field_key).id = field_id
       else
         multi_field(field_key).find{|f| f.key == field_key && f.value == field_value}.id = field_id
       end
+    end
+
+    # Returns hash where keys are field names where the values differ.
+    # values of returned hash are arrays like
+    # [own_value, other_different_value].
+    # Returns empty hash to signalize equaliness.
+    def diff(other_cpt_object)
+      diff_fields = {}
+      (@fields.keys - other_cpt_object.fields.keys).each do |f|
+        puts "FIELD: #{f}"
+        diff_fields[f] = [@fields[f].value, nil]
+      end
+      (other_cpt_object.fields.keys - @fields.keys).each do |f|
+        diff_fields[f] = [nil, other_cpt_object.fields[f].value]
+      end
+      diff_fields
     end
   end
 end
