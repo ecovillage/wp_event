@@ -383,5 +383,9 @@ module WPEvent
       end
       diff_fields
     end
+
+    def different_from? other_cpt_object
+      !diff(other_cpt_object).empty?
+    end
   end
 end

@@ -397,6 +397,25 @@ class CPTTest < Minitest::Test
     assert_equal asserted_diff, movie_one.diff(movie_two)
   end
 
+  def test_different_from
+    movie = MovieCPT.new name: 'Menula One', year: '2008'
+    content_hash = { "post_type"     => "movie",
+                     "custom_fields" => [
+                       {"id" => "22", "key" => "miles", "value" => "2"},
+                       {"key" => "year", "value" => "2007"},
+                     ]}
+    other_movie = MovieCPT.from_content_hash content_hash
+    assert_equal true, movie.different_from?(other_movie)
+
+    content_hash = { "post_type"     => "movie",
+                     "post_title"    => "Menula One",
+                     "custom_fields" => [
+                       {"id" => "22", "key" => "year", "value" => "2008"},
+                     ]}
+    other_movie = MovieCPT.from_content_hash content_hash
+    assert_equal false, movie.different_from?(other_movie)
+  end
+
   def test_additional_field_action_ignore
     skip "Not yet implemented"
   end
