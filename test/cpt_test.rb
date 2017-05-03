@@ -389,6 +389,13 @@ class CPTTest < Minitest::Test
     assert_equal asserted_diff, book_one.diff(book_two)
   end
 
+  def test_diff_against_nil
+    movie_one = MovieCPT.new name: 'Menula One', year: '2008'
+
+    asserted_diff = {'year' => ['2008', nil], 'title' => ['Menula One', nil]}
+    assert_equal asserted_diff, movie_one.diff(nil)
+  end
+
   def test_diff_builtin_values
     movie_one = MovieCPT.new name: 'Menula One', year: '2008'
     movie_two = MovieCPT.new name: 'Menula Two', year: '2010'
