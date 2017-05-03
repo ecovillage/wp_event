@@ -345,6 +345,10 @@ module WPEvent
     # [own_value, other_different_value].
     # Returns empty hash to signalize equaliness.
     def diff(other_cpt_object)
+      if other_cpt_object.nil?
+        other_cpt_object = NullCustomPostType.new
+      end
+
       diff_fields = {}
       # Fields exclusive to this one.
       (@fields.keys - other_cpt_object.fields.keys).each do |f|
@@ -387,5 +391,8 @@ module WPEvent
     def different_from? other_cpt_object
       !diff(other_cpt_object).empty?
     end
+  end
+
+  class NullCustomPostType < CustomPostType
   end
 end
