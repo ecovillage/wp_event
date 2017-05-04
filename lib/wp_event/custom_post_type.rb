@@ -382,7 +382,7 @@ module WPEvent
           diff_fields[f] = [field_values, other_field_values]
         end
       end
-      if @title != other_cpt_object.title
+      if @title.to_s.strip != other_cpt_object.title.to_s.strip
         diff_fields["title"] = [@title, other_cpt_object.title]
       end
       diff_fields
