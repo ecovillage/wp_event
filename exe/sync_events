@@ -34,6 +34,11 @@ option_parser = OptionParser.new do |opts|
     options[:show_diff_only] = d
   end
 
+  opts.on("-f", "--[no-]force", "Push all data, no matter what") do |f|
+    options[:force] = f
+  end
+
+
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -52,6 +57,11 @@ end
 option_parser.parse!
 
 WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+
+if options[:show_diff_only] && options[:force]
+  exit_with 1, "Options --show-diff-only and --force contradict each other, "\
+               "only one can be specified."
+end
 
 debug "Starting event sync (#{WPEvent::VERSION})"
 
@@ -95,16 +105,20 @@ events.each_with_index do |event, idx|
     attachment_id = image_uploader.process(event[:image_url])
     event_from_json.featured_image_id = attachment_id
 
-    if options[:show_diff_only]
+    if options[:force]
+      syncer.merge_push event_from_json, event_from_wp
+    else
       diffs = event_from_json.diff(event_from_wp)
       if !diffs.empty?
-        info "Differences for #{uuid} (local/remote)"
-        info "  #{event_from_json.diff(event_from_wp)}"
+        if options[:show_diff_only]
+          info "Differences for #{uuid} (local/remote)"
+          info "  #{event_from_json.diff(event_from_wp)}"
+        else
+          syncer.merge_push event_from_json, event_from_wp
+        end
       else
-        info "#{uuid} is current."
+        info "#{uuid} is unchanged."
       end
-    else
-      syncer.merge_push event_from_json, event_from_wp
     end
 
   rescue WPEvent::MissingCategoryError => e
