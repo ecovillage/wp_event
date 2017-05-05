@@ -64,7 +64,10 @@ module WPEvent
   end
 
   def self.logger
-    @@logger ||= Logger.new(STDOUT)
+    # ruby 2.4 will ship with Logger.new(STDOUT, formatter: ...)
+    @@logger ||= Logger.new(STDOUT).tap do |l|
+      l.formatter = CLI::Logging::ColoredFormatter.new
+    end
   end
 
   def self.logger= logger
