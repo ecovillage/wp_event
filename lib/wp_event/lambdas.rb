@@ -9,5 +9,14 @@ module WPEvent
         end
       end
     end
+
+    # returns a custom field value of a nested hash.
+    def self.cf_value(key)
+      cf_value = lambda do |x|
+        x["custom_fields"].find do |f|
+          f["key"] == key
+        end&.fetch("value", nil)
+      end
+    end
   end
 end
