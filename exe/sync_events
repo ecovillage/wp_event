@@ -30,7 +30,7 @@ option_parser = OptionParser.new do |opts|
     options[:image_store] = s
   end
 
-  opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run") do |d|
+  opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run)") do |d|
     options[:show_diff_only] = d
   end
 
@@ -111,8 +111,12 @@ events.each_with_index do |event, idx|
       diffs = event_from_json.diff(event_from_wp)
       if !diffs.empty?
         if options[:show_diff_only]
-          info "Differences for #{uuid} (local/remote)"
-          info "  #{event_from_json.diff(event_from_wp)}"
+          if event_from_wp.nil? || event_from_wp.uuid.nil?
+            info "Event is new (not found in wordpress)"
+          else
+            info "Differences for #{uuid} (local/remote)"
+            info "  #{event_from_json.diff(event_from_wp)}"
+          end
         else
           syncer.merge_push event_from_json, event_from_wp
         end

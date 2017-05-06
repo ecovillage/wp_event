@@ -368,7 +368,7 @@ module WPEvent
       end
       # Multi-Fields exclusive to this one.
       (@multi_fields.keys - other_cpt_object.multi_fields.keys).each do |f|
-        diff_fields[f] = [@multi_fields[f].value, nil]
+        diff_fields[f] = [@multi_fields[f].map(&:value), nil]
       end
       # Multi-Fields exclusive to the other.
       (other_cpt_object.multi_fields.keys - @multi_fields.keys).each do |f|
