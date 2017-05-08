@@ -70,7 +70,7 @@ module WPEvent
 
     # Add language term and post author data to WP content hash.
     def adjust_content content
-      content[:term_names]  = { 'language' => ['Deutsch'] }
+      content[:terms_names]  = { 'language' => ['Deutsch'] }
       content[:post_author] = 1
     end
   end
