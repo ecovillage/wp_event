@@ -16,7 +16,7 @@ module WPEvent
     #
     #   new_post_content
     #     The data that **should** be in wordpress (without knowing
-    #     of wordpress post or custom field ids).
+    #     of wordpress post or custom field ids).  Usually descendant of CustomPostType.
     #
     #   old_post
     #     The data currently available in wordpress (including
