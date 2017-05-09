@@ -62,6 +62,7 @@ module WPEvent
           costs_participation: web_notice_array_val(document, "cost_seminar"),
           registration_needed: document.dig("g_value", "registration_needed"),
           cancel_conditions: document.dig("g_value", "cancel_conditions"),
+          current_infos: document.dig("g_value", "web_notice"),
           image_url: document.dig("g_value", "thumbnail"),
           document: document,
           timestamp: Time.at(document.dig("g_timestamp").to_i).to_datetime
