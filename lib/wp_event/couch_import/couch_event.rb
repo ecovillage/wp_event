@@ -55,11 +55,11 @@ module WPEvent
           from: Date.strptime(document.dig("g_value", "date_from"), "%d.%m.%Y"),
           category_names: document.dig("g_value", "categories"),
           referee_and_qualifications: extract_referees(document),
-          arrival: web_notice_array_val(document, "arrival"),
-          departure: web_notice_array_val(document, "departure"),
-          costs_catering: web_notice_array_val(document, "cost_housing"),
-          info_housing: web_notice_array_val(document, "housing"),
-          costs_participation: web_notice_array_val(document, "cost_seminar"),
+          arrival: web_notice_array_val(document, "arrival", "Anreise"),
+          departure: web_notice_array_val(document, "departure", "Abreise"),
+          costs_catering: web_notice_array_val(document, "cost_housing", "Biovollverpflegung"),
+          info_housing: web_notice_array_val(document, "housing", "Unterkunft"),
+          costs_participation: web_notice_array_val(document, "cost_seminar", "Seminarkosten"),
           registration_needed: document.dig("g_value", "registration_needed"),
           cancel_conditions: document.dig("g_value", "cancel_conditions"),
           current_infos: document.dig("g_value", "web_notice"),
@@ -92,12 +92,11 @@ module WPEvent
         end
       end
 
-      def self.web_notice_array_val document, field
+      def self.web_notice_array_val document, field, label="FORBIDDENLABELNAME"
         notices = document.dig("g_value", "web_notice_array")
         return nil if notices.nil?
 
-        notice = notices.find{|n| n["field"] == field}
-        #&WPEvent::CouchImport::Lambdas.web_notice_array_find(field)
+        notice = notices.find(&WPEvent::CouchImport::Lambdas.web_notice_array_find(field, label))
         return nil if notice.nil?
 
         notice["text"]
