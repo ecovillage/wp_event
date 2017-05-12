@@ -61,6 +61,8 @@ module WPEvent
           info_housing: web_notice_array_val(document, "housing", "Unterkunft"),
           costs_participation: web_notice_array_val(document, "cost_seminar", "Seminarkosten"),
           registration_needed: document.dig("g_value", "registration_needed"),
+          participants_prerequisites: document.dig("g_value", "attendee_preconditions"),
+          participants_please_bring: document.dig("g_value", "please_bring"),
           cancel_conditions: document.dig("g_value", "cancel_conditions"),
           current_infos: document.dig("g_value", "web_notice"),
           image_url: document.dig("g_value", "thumbnail"),
