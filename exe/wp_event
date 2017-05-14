@@ -93,6 +93,9 @@ end
 if options[:uuid]
   event = event_cache.in_mem_lookup options[:uuid]
   if options[:export]
+    if !event
+      exit_with 4, "Event not found"
+    end
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   end
@@ -140,6 +143,9 @@ if options[:uuid]
 else
   event = event_cache.by_post_id options[:id]
   if options[:export]
+    if !event
+      exit_with 4, "Event not found"
+    end
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   else
