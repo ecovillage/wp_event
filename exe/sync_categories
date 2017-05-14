@@ -18,6 +18,11 @@ option_parser = OptionParser.new do |opts|
     Will exit with 0 on success
 
   USAGE
+
+  opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run)") do |d|
+    options[:show_diff_only] = d
+  end
+
   opts.separator "Common options"
   opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
     options[:verbose] = v
@@ -47,32 +52,56 @@ if ARGV.length != 1
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  exit_with 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (compostr.conf) not found."
 end
 
-category_cache  = WPEvent::EntityCache.new(WPEvent::CategoryPost)
-media_cache    = WPEvent::MediaLibraryCache.new
+category_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
+#TODO image?
+media_cache    = Compostr::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
-syncer = WPEvent::Syncer.new image_uploader
+syncer = Compostr::Syncer.new image_uploader
 
 categories = JSON.parse File.read(ARGV[0])
 
-categories.each do |category|
-  wp_category = WPEvent::CategoryPost.uuid_in_wordpress? category["uuid"]
-  if wp_category
-    info "category with uuid #{category['uuid']} found, updating"
-    WPEvent::CategoryPost.update wp_category["post_id"],
-                                 category["name"],
-                                 category["description"]
-    debug "updated #{category['uuid']}: #{wp_category} -> #{category}"
-  else
-    info "category with uuid #{category['uuid']} not found, creating"
-    wp_category = WPEvent::CategoryPost.create category["uuid"],
-                                               category["name"],
-                                               category["description"]
+categories.each_with_index do |json_category, idx|
+  # TODO add images here or only within Syncer?
+
+  wp_category = category_cache.in_mem_lookup(json_category["uuid"])
+
+  info "(#{idx + 1}/#{categories.length}): Processing category with uuid #{json_category['uuid']}: #{wp_category.nil? ? 'create': 'update'}"
+
+  # Transform string keys to symbol keys.
+  # This **could** be done directly while parsing the json:
+  #   x = JSON.parse json, symbolize_names: true
+  json_category.keys.each do |key|
+    json_category[(key.to_sym rescue key) || key] = json_category.delete(key)
   end
+
+  category = WPEvent::CustomPostTypes::Category.new(**json_category)
+  wp_cat   = WPEvent::CustomPostTypes::Category.from_content_hash(wp_category)
+
+  diffs = category.diff(wp_cat)
+  if !diffs.empty?
+    if options[:show_diff_only]
+      if wp_cat.nil? || wp_cat.uuid.nil?
+        info "Category is new (not found in wordpress)"
+      else
+        info "Differences for #{category.uuid} (local/remote)"
+        info "  #{diffs}"
+      end
+    else
+      sync_result = syncer.merge_push(category, wp_cat)
+    end
+  else
+    info "#{category.uuid} is unchanged."
+  end
+
+
+  #  # Attach image?
+  #  # post_id post_title post_content
+  #  # {"uuid", "name", "description"}
 end
 
 exit 0
