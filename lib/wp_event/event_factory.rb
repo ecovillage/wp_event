@@ -14,8 +14,8 @@ module WPEvent
     attr_accessor :category_cache, :referee_cache, :raise_on_missing_referee
 
     def initialize raise_on_missing_referee: true
-      @category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
-      @referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
+      @category_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
+      @referee_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
       @raise_on_missing_referee = raise_on_missing_referee
     end
 

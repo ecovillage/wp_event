@@ -65,8 +65,8 @@ json = input.read
 referees = JSON.parse json#, symbolize_names: true
 # TODO nicer parse error display, begin..rescue
 
-referee_cache  = WPEvent::EntityCache.new(WPEvent::RefereePost)
-media_cache    = WPEvent::MediaLibraryCache.new
+referee_cache  = Compostr::EntityCache.new(WPEvent::RefereePost)
+media_cache    = Compostr::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
 syncer = WPEvent::Syncer.new image_uploader

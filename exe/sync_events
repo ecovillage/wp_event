@@ -66,9 +66,9 @@ end
 debug "Starting event sync (#{WPEvent::VERSION})"
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  exit_with 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (compostr.conf) not found."
 end
 
 begin
@@ -82,11 +82,11 @@ rescue JSON::ParserError => e
   exit_with 5, "Input could not be parsed (valid json?)."
 end
 
-event_cache    = WPEvent::EntityCache.new(WPEvent::EventPost)
-media_cache    = WPEvent::MediaLibraryCache.new
+event_cache    = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
+media_cache    = Compostr::MediaLibraryCache.new
 image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::Syncer.new image_uploader
+syncer = Compostr::Syncer.new image_uploader
 
 event_factory = WPEvent::EventFactory.new raise_on_missing_referee: !options[:ignore_missing_referees]
 

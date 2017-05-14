@@ -1,6 +1,6 @@
 module WPEvent
   module CustomPostTypes
-    class Event < CustomPostType
+    class Event < Compostr::CustomPostType
       attr_accessor :referee_id_qualification_map
 
       wp_post_type 'ev7l-event'
@@ -34,7 +34,7 @@ module WPEvent
       def add_referee(id, qualification)
         @referee_id_qualification_map[id] = qualification
         ref_qa_field_name = "referee_#{id}_qualification"
-        @fields[ref_qa_field_name] = CustomFieldValue.new(nil, ref_qa_field_name, qualification)
+        @fields[ref_qa_field_name] = Compostr::CustomFieldValue.new(nil, ref_qa_field_name, qualification)
       end
     end
   end
