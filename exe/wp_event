@@ -76,16 +76,16 @@ if options[:id] && options[:uuid]
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
+  STDERR.puts "Config file (compostr.conf) not found."
   exit 3
 end
 
 
 if options[:list]
-  # uuid, name
-  puts WPEvent::EventPost.name_pid_map.to_yaml
+  cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
+  puts cache.name_id_map.to_yaml
   exit 0
 end
 
