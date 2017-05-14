@@ -2,6 +2,8 @@
 
 Ruby scripts to populate siebenlinden.org wordpress installation with event, referee and event category data.  The companion for the [ev7l-events Wordpress Plugin](https://github.com/ecovillage/ev7l-events).
 
+Currently in a WIP state, where the [Compostr](https://github.com/ecovillage/compostr) gem is extracted, which will deal with most not-so-specific tasks.
+
 Licensed under the GPLv3+, Copyright 2016, 2017 Felix Wolfsteller.
 
 ## Installation
@@ -31,11 +33,11 @@ For each type, three tools exist:
   - the second tool updates/'synchronizes' the entities in the wordpress instance with a list of entities read from a (json) file.
   - finally, there is a tool to create a json file with legacy data from a supercustom couchdb; take this as an example of how to create a json file (to be used with a 'sync'-tool) if you like.
 
-### Global configuration with wp_event.config
+### Global configuration with compostr.conf
 
-Tools rely on the file `wp_event.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory (listing Wordpress credentials):
+Tools rely on the file `compostr.conf` being present in your current working directory.  An example file is provided as `wp_event.conf.sample`.  Its content is rather self-explanatory (listing Wordpress credentials):
 
-    # wp_event.conf
+    # compostr.conf
     host:     "wp_event.mydomain"
     username: "admin"
     password: "buzzword"
