@@ -92,7 +92,7 @@ category_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
 
 # Actions
 if options[:list]
-  puts category_cache.name_pid_map.to_yaml
+  puts category_cache.name_id_map.to_yaml
   exit 0
 end
 
@@ -115,11 +115,11 @@ if options[:uuid]
 
   # Export, Update or Create?
   if !category
-    category = WPEvent::CategoryPost.create options[:uuid],
-                                        options[:name],
-                                        options[:description],
-                                        attachment_id
-    puts "created"
+    category = WPEvent::CustomPostTypes::Category.new uuid: options[:uuid],
+                                                      name: options[:name],
+                                                      description: options[:description]#,
+                                                      # attachment_id
+    Compostr::Syncer.new(nil).merge_push event, nil
     post_id = category
   else
     post_id = category["post_id"]

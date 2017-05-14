@@ -92,7 +92,7 @@ referee_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 
 if options[:list]
   # uuid, name
-  puts referee_cache.name_pid_map.to_yaml
+  puts referee_cache.name_id_map.to_yaml
   exit 0
 end
 
@@ -140,8 +140,10 @@ if options[:uuid]
       featured_image_id: attachment_id
     )
 
-    info "referee created (#{referee})"
-    post_id = referee
+    Compostr::Syncer.new(nil).merge_push referee, nil
+
+    info "referee created ({referee_post_id}: #{referee})"
+    post_id = nil#referee_post_id
   else
     puts "found, wont update, maybe(nyi)"
     post_id = referee["post_id"]
