@@ -82,16 +82,16 @@ rescue Errno::ENOENT
   exit 3
 end
 
+event_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
 
 if options[:list]
-  cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
-  puts cache.name_id_map.to_yaml
+  puts event_cache.name_id_map.to_yaml
   exit 0
 end
 
 # Check existence
 if options[:uuid]
-  event = WPEvent::EventPost.uuid_in_wordpress? options[:uuid]
+  event = event_cache.in_mem_lookup options[:uuid]
   if options[:export]
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
@@ -136,7 +136,7 @@ if options[:uuid]
     post_id = event["post_id"]
   end
 else
-  event = WPEvent::EventPost.by_post_id options[:id]
+  event = event_cache.by_post_id options[:id]
   if options[:export]
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
