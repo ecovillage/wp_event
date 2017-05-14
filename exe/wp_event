@@ -102,8 +102,8 @@ if options[:uuid]
     exit 6
   end
 
-  category_cache = Compostr::EntityCache.new(WPEvent::CategoryPost)
-  referee_cache  = Compostr::EntityCache.new(WPEvent::RefereePost)
+  category_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
+  referee_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 
   # Export, Update or Create?
   if !event
@@ -123,14 +123,16 @@ if options[:uuid]
       info "Image uploaded (#{attachment_id})"
     end
 
-    event = WPEvent::EventPost.create options[:uuid],
-                                      options[:name],
-                                      options[:from]..options[:to],
-                                      options[:description],
-                                      category_ids,
-                                      attachment_id || nil
+    event = WPEvent::CustomPostTypes::Event.new uuid: options[:uuid],
+                                      name:     options[:name],
+                                      fromdate: options[:from].to_time.to_i,
+                                      todate:   options[:to].to_time.to_i,
+                                      description: options[:description]#,
+                                      #category_ids,
+                                      #attachment_id || nil
 
-    info "event created (#{event})"
+    Compostr::Syncer.new(nil).merge_push event, nil
+    info "event created (#{event.post_id})"
     post_id = event
   else
     post_id = event["post_id"]

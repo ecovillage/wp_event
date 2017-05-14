@@ -131,11 +131,13 @@ if options[:uuid]
       info "Image uploaded (#{attachment_id})"
     end
 
-    referee = WPEvent::RefereePost.create options[:uuid],
-                                          options[:firstname],
-                                          options[:lastname],
-                                          options[:description],
-                                          attachment_id || nil
+    referee = WPEvent::CustomPostTypes::Referee.new(
+      uuid:      options[:uuid],
+      firstname: options[:firstname],
+      lastname:  options[:lastname],
+      content:   options[:description],
+      featured_image_id: attachment_id
+    )
 
     info "referee created (#{referee})"
     post_id = referee
