@@ -21,8 +21,6 @@ require "wp_event/referee_post"
 
 require "wp_event/downloader"
 require "wp_event/image_download"
-require "wp_event/image_upload"
-require "wp_event/image_uploader"
 
 require "wp_event/referee_syncer"
 require "wp_event/event_syncer"
