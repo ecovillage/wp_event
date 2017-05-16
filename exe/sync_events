@@ -84,7 +84,7 @@ end
 
 event_cache    = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
 media_cache    = Compostr::MediaLibraryCache.new
-image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
+image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 
 syncer = Compostr::Syncer.new image_uploader
 
