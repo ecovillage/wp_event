@@ -39,20 +39,6 @@ require 'yaml'
 require 'rubypress'
 
 module WPEvent
-  # .collect{|| .. "custom_fields" ... ["key"] == "uuid" ...
-  # #f12ab-ab21f
-  def self.find_post_by_uuid uuid
-    posts = find_all_posts
-
-    custom_uuid_field_value = lambda do |c|
-      c["custom_fields"]&.find{|f| f["key"] == "uuid"}&.fetch("value") == uuid
-    end
-
-    #"post_modified_gmt"
-
-    posts.find &custom_uuid_field_value
-  end
-
   def self.logger
     # ruby 2.4 will ship with Logger.new(STDOUT, formatter: ...)
     @@logger ||= Logger.new(STDOUT).tap do |l|
@@ -62,10 +48,6 @@ module WPEvent
 
   def self.logger= logger
     @@logger = logger
-  end
-
-  def self.find_all_posts
-    Compostr::wp.getPosts(blog_id: 0, filter: {post_type: Event::TYPE})
   end
 
   def self.delete_post post_id
