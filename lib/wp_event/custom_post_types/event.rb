@@ -17,6 +17,7 @@ module WPEvent
       wp_custom_field_single 'arrival'
       wp_custom_field_single 'departure'
       wp_custom_field_single 'current_infos'
+      wp_custom_field_single 'other_infos'
       wp_custom_field_single 'costs_participation'
       wp_custom_field_single 'costs_catering'
       wp_custom_field_single 'info_housing'
