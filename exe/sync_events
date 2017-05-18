@@ -30,6 +30,10 @@ option_parser = OptionParser.new do |opts|
     options[:image_store] = s
   end
 
+  opts.on("-d", "--delete-missing-events", "Delete events that are missing in INPUT (within INPUTS time range)") do |d|
+    options[:delete_missing] = d
+  end
+
   opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run)") do |d|
     options[:show_diff_only] = d
   end
@@ -89,6 +93,15 @@ image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 syncer = Compostr::Syncer.new image_uploader
 
 event_factory = WPEvent::EventFactory.new raise_on_missing_referee: !options[:ignore_missing_referees]
+
+if options[:delete_missing]
+  if events.count < 2
+    exit_with 6, "Need more events to find out the range in which to delete events"
+  end
+  inputs_time_range = [events.map{|e| e["fromdate"]}.min,
+                       events.map{|e| e["todate"]}.max]
+  inputs_time_range.map! {|t| t = DateTime.parse(t)}
+end
 
 events.each_with_index do |event, idx|
   uuid = event['uuid']
