@@ -54,9 +54,9 @@ if ARGV.length != 1 && STDIN.tty?
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  exit_with 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (compostr.conf) not found."
 end
 
 input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
@@ -65,11 +65,11 @@ json = input.read
 referees = JSON.parse json#, symbolize_names: true
 # TODO nicer parse error display, begin..rescue
 
-referee_cache  = Compostr::EntityCache.new(WPEvent::RefereePost)
+referee_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 media_cache    = Compostr::MediaLibraryCache.new
-image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
+image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::Syncer.new image_uploader
+syncer = Compostr::Syncer.new image_uploader
 
 referees.each_with_index do |referee, idx|
 
@@ -86,7 +86,7 @@ referees.each_with_index do |referee, idx|
 
   debug "Referee from cache: #{wp_referee}"
 
-  syncer.merge_push WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee), WPEvent::CustomPostTypes::Referee.new(**referee)
+  syncer.merge_push WPEvent::CustomPostTypes::Referee.new(**referee), WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee)
 end
 
 exit 0
