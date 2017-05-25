@@ -33,7 +33,10 @@ module WPEvent
                                "ERROR" => IN_RED }
 
         def initialize
-          @colorize = STDOUT.tty?
+          super
+          # Alternatively poor-mans solution STDOUT.tty?
+          # We need to hack our way into logger (logdev is not accessible from outside)
+          @colorize = Compostr::logger.instance_eval("@logdev&.dev&.tty?")
         end
 
         def call(severity, time, progname, msg)
