@@ -2,6 +2,7 @@ module WPEvent
   class ImageDownload
     include WPEvent::CLI::Logging
     include WPEvent::CLI
+    include WPEvent::CLI::Tool
 
     attr_accessor :image_store
     attr_accessor :image_source

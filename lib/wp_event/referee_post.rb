@@ -4,6 +4,7 @@ require 'time'
 module WPEvent
   module RefereePost
     extend PostType
+    extend WPEvent::CLI::Logging
 
     TYPE = 'ev7l-referee'
 

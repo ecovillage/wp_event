@@ -29,7 +29,8 @@ module WPEvent
         IN_WHITE        = "\e[37m%s\e[0;0m"
 
         SEVERITY_COLOR_MAP = { "DEBUG" => IN_YELLOW,
-                               "INFO"  => IN_GREEN }
+                               "INFO"  => IN_GREEN,
+                               "ERROR" => IN_RED }
 
         def initialize
           @colorize = STDOUT.tty?

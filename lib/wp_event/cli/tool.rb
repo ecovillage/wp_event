@@ -26,10 +26,12 @@ module WPEvent
     #
     # In any case where output goes to STDOUT, logging shall happen on STDERR.
     module Tool
-      include WPEvent::CLI::Logging
+      include Compostr::Logging
 
       class InputArgumentError < StandardError
       end
+
+      # TODO USAGE BANNER
 
       def exit_on_arg_and_outfile! argv, options
         if ARGV.length == 1 && options[:outfile]
@@ -75,7 +77,15 @@ module WPEvent
         #end
 
         input = ARGV.length == 1 ? File.open(ARGV[0]) : STDIN
-        #json = input.read
+      end
+
+      # Inits the (Compostr) logger.
+      def self.init_logger verbose: false, stderr: false
+        # ruby 2.4 will ship with Logger.new(STDOUT, formatter: ...)
+        Compostr.logger = Logger.new(stderr ? STDERR : STDOUT).tap do |l|
+          l.formatter = CLI::Logging::ColoredFormatter.new
+          l.level = verbose ? Logger::DEBUG : Logger::INFO
+        end
       end
     end
   end

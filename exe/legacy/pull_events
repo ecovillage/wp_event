@@ -71,12 +71,8 @@ option_parser.parse!
 # TODO this creates file before its used. frustration on errors (because then empty file is created)
 outstream = exit_or_get_out_stream ARGV, options
 
-if !outstream.is_a?(File)
-  WPEvent.logger = Logger.new(STDERR)
-end
-
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
-
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose],
+  stderr: !outstream.is_a?(File)
 
 if options[:from] && options[:to] && options[:uuid]
   exit_with 2, "Cannot specify --from, --to AND --uuid, aborting."

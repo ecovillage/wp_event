@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'wp_event'
+
 require 'optparse'
 require 'json'
 
-extend WPEvent::CLI::Logging
 extend WPEvent::CLI
 extend WPEvent::CLI::Tool
 
@@ -60,7 +60,7 @@ end
 # Process options
 option_parser.parse!
 
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
 
 if options[:show_diff_only] && options[:force]
   exit_with 1, "Options --show-diff-only and --force contradict each other, "\

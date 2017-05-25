@@ -8,8 +8,8 @@ module WPEvent
   # which is not yet registered as Post in Wordpress, a
   # WPEvent::MissingCategoryError is raised.
   class EventFactory
-    include WPEvent::CLI::Logging
     include WPEvent::CLI
+    include WPEvent::CLI::Tool
 
     attr_accessor :category_cache, :referee_cache, :raise_on_missing_referee
 

@@ -1,12 +1,12 @@
 require "wp_event/version"
 
+require 'compostr'
+
 require "wp_event/cli/logging"
 require "wp_event/cli"
 require "wp_event/cli/tool"
 
 require "wp_event/lambdas"
-
-require 'compostr'
 
 require "wp_event/custom_post_types/category"
 require "wp_event/custom_post_types/event"
@@ -37,16 +37,7 @@ require 'yaml'
 require 'rubypress'
 
 module WPEvent
-  def self.logger
-    # ruby 2.4 will ship with Logger.new(STDOUT, formatter: ...)
-    @@logger ||= Logger.new(STDOUT).tap do |l|
-      l.formatter = CLI::Logging::ColoredFormatter.new
-    end
-  end
-
-  def self.logger= logger
-    @@logger = logger
-  end
+  WPEvent::CLI::Tool.init_logger
 
   def self.delete_post post_id
     Compostr::wp.deletePost(blog_id: 0, post_id: post_id)
