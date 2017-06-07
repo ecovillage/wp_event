@@ -32,6 +32,18 @@ module WPEvent
         @referee_id_qualification_map = {}
       end
 
+      # override aliased method (why alias_method does not do this job in
+      # compostr custom_post_type is yet unclear to me)
+      def description=(new_value)
+        self.content=(new_value)
+      end
+
+      # Strip script tags from content.
+      def content=(new_value)
+        new_value_unscript = new_value.gsub(/<script.*script>/,'')
+        super(new_value_unscript)
+      end
+
       def add_referee(id, qualification)
         @referee_id_qualification_map[id] = qualification
         ref_qa_field_name = "referee_#{id}_qualification"
