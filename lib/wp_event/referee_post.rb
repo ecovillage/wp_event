@@ -37,7 +37,7 @@ module WPEvent
 
     def self.update wp_post, firstname, lastname, text, featured_image_id=nil
       if text.nil?
-        WPEvent.logger.warn "Description of referee (#{uuid}) is nil! Setting to empty value."
+        WPEvent.logger.warn "Description of referee (WP-ID #{wp_post['post_id']}) is nil! Setting to empty value."
         text = ""
       end
 
