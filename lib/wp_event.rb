@@ -16,7 +16,6 @@ require "wp_event/event_factory"
 require "wp_event/post_type"
 require "wp_event/post_meta_data"
 require "wp_event/category_post"
-require "wp_event/event_post"
 require "wp_event/referee_post"
 
 require "wp_event/downloader"
