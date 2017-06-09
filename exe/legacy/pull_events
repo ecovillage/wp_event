@@ -106,6 +106,7 @@ if options[:uuid]
       end
 
       debug "Original document: #{event.document}"
+      events << event
     end
   end
 
