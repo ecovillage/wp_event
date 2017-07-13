@@ -139,7 +139,7 @@ events.each_with_index do |event, idx|
     end
 
   rescue WPEvent::MissingCategoryError => e
-    exit_with 7, "A required category does not exist, aborting."
+    exit_with 7, "A required category (in #{e.missing_categories}) does not exist, aborting."
   rescue WPEvent::MissingRefereeError => e
     exit_with 8, "A required referee (in uuids: #{e.missing_referees})"\
                  " does not exist, aborting."
