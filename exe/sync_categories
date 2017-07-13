@@ -4,6 +4,8 @@ require 'wp_event'
 require 'optparse'
 require 'json'
 
+extend WPEvent::CLI
+extend WPEvent::CLI::Tool
 extend WPEvent::CLI::Logging
 
 options = {}
