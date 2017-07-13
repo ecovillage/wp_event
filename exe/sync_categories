@@ -62,7 +62,7 @@ end
 category_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
 #TODO image?
 media_cache    = Compostr::MediaLibraryCache.new
-image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
+image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 syncer = Compostr::Syncer.new image_uploader
 
 categories = JSON.parse File.read(ARGV[0])
