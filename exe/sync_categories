@@ -106,4 +106,5 @@ categories.each_with_index do |json_category, idx|
   #  # {"uuid", "name", "description"}
 end
 
+debug "Finished event category sync (#{WPEvent::VERSION})"
 exit 0

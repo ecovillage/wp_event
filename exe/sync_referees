@@ -90,4 +90,5 @@ referees.each_with_index do |referee, idx|
   syncer.merge_push WPEvent::CustomPostTypes::Referee.new(**referee), WPEvent::CustomPostTypes::Referee.from_content_hash(wp_referee)
 end
 
+debug "Finished referee sync (#{WPEvent::VERSION})"
 exit 0

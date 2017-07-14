@@ -146,4 +146,5 @@ events.each_with_index do |event, idx|
   end
 end
 
+debug "Finished event sync (#{WPEvent::VERSION})"
 exit 0
