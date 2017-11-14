@@ -7,6 +7,7 @@ require 'optparse/date' # this has to be documented in ruby! (TODO)
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
+extend WPEvent::CLI::Tool
 
 options = {}
 
@@ -61,7 +62,7 @@ end
 # Process options
 option_parser.parse!
 
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
 
 if !options[:id] && !options[:uuid] && !options[:list]
   STDERR.puts "Please provide at least the events (uu)id or specify the list action."
@@ -76,23 +77,26 @@ if options[:id] && options[:uuid]
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
+  STDERR.puts "Config file (compostr.conf) not found."
   exit 3
 end
 
+event_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
 
 if options[:list]
-  # uuid, name
-  puts WPEvent::EventPost.name_pid_map.to_yaml
+  puts event_cache.name_id_map.to_yaml
   exit 0
 end
 
 # Check existence
 if options[:uuid]
-  event = WPEvent::EventPost.uuid_in_wordpress? options[:uuid]
+  event = event_cache.in_mem_lookup options[:uuid]
   if options[:export]
+    if !event
+      exit_with 4, "Event not found"
+    end
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   end
@@ -102,7 +106,8 @@ if options[:uuid]
     exit 6
   end
 
-  category_cache = WPEvent::EntityCache.new(WPEvent::CategoryPost)
+  category_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
+  referee_cache  = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 
   # Export, Update or Create?
   if !event
@@ -122,21 +127,26 @@ if options[:uuid]
       info "Image uploaded (#{attachment_id})"
     end
 
-    event = WPEvent::EventPost.create options[:uuid],
-                                      options[:name],
-                                      options[:from]..options[:to],
-                                      options[:description],
-                                      category_ids,
-                                      attachment_id || nil
+    event = WPEvent::CustomPostTypes::Event.new uuid: options[:uuid],
+                                      name:     options[:name],
+                                      fromdate: options[:from].to_time.to_i,
+                                      todate:   options[:to].to_time.to_i,
+                                      description: options[:description]#,
+                                      #category_ids,
+                                      #attachment_id || nil
 
-    info "event created (#{event})"
+    Compostr::Syncer.new(nil).merge_push event, nil
+    info "event created (#{event.post_id})"
     post_id = event
   else
     post_id = event["post_id"]
   end
 else
-  event = WPEvent::EventPost.by_post_id options[:id]
+  event = event_cache.by_post_id options[:id]
   if options[:export]
+    if !event
+      exit_with 4, "Event not found"
+    end
     STDOUT.puts JSON.pretty_generate(event)
     exit 0
   else

@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'wp_event'
+
 require 'optparse'
 require 'json'
 
-extend WPEvent::CLI::Logging
 extend WPEvent::CLI
 extend WPEvent::CLI::Tool
 
@@ -28,6 +28,10 @@ option_parser = OptionParser.new do |opts|
 
   opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
     options[:image_store] = s
+  end
+
+  opts.on("-d", "--delete-missing-events", "Delete events that are missing in INPUT (within INPUTS time range)") do |d|
+    options[:delete_missing] = d
   end
 
   opts.on("", "--show-diff-only", "Only show differences (do not sync, kind of dry-run)") do |d|
@@ -56,7 +60,7 @@ end
 # Process options
 option_parser.parse!
 
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
 
 if options[:show_diff_only] && options[:force]
   exit_with 1, "Options --show-diff-only and --force contradict each other, "\
@@ -66,9 +70,9 @@ end
 debug "Starting event sync (#{WPEvent::VERSION})"
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  exit_with 3, "Config file (wp_event.conf) not found."
+  exit_with 3, "Config file (compostr.conf) not found."
 end
 
 begin
@@ -82,13 +86,22 @@ rescue JSON::ParserError => e
   exit_with 5, "Input could not be parsed (valid json?)."
 end
 
-event_cache    = WPEvent::EntityCache.new(WPEvent::EventPost)
-media_cache    = WPEvent::MediaLibraryCache.new
-image_uploader = WPEvent::ImageUploader.new options[:image_store], media_cache
+event_cache    = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
+media_cache    = Compostr::MediaLibraryCache.new
+image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 
-syncer = WPEvent::Syncer.new image_uploader
+syncer = Compostr::Syncer.new image_uploader
 
 event_factory = WPEvent::EventFactory.new raise_on_missing_referee: !options[:ignore_missing_referees]
+
+if options[:delete_missing]
+  if events.count < 2
+    exit_with 6, "Need more events to find out the range in which to delete events"
+  end
+  inputs_time_range = [events.map{|e| e["fromdate"]}.min,
+                       events.map{|e| e["todate"]}.max]
+  inputs_time_range.map! {|t| t = DateTime.parse(t)}
+end
 
 events.each_with_index do |event, idx|
   uuid = event['uuid']
@@ -126,11 +139,12 @@ events.each_with_index do |event, idx|
     end
 
   rescue WPEvent::MissingCategoryError => e
-    exit_with 7, "A required category does not exist, aborting."
+    exit_with 7, "A required category (in #{e.missing_categories}) does not exist, aborting."
   rescue WPEvent::MissingRefereeError => e
     exit_with 8, "A required referee (in uuids: #{e.missing_referees})"\
                  " does not exist, aborting."
   end
 end
 
+debug "Finished event sync (#{WPEvent::VERSION})"
 exit 0

@@ -82,22 +82,23 @@ if options[:id] && options[:uuid]
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
+  STDERR.puts "Config file (compostr.conf) not found."
   exit 3
 end
 
+referee_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 
 if options[:list]
   # uuid, name
-  puts WPEvent::RefereePost.name_pid_map.to_yaml
+  puts referee_cache.name_id_map.to_yaml
   exit 0
 end
 
 # Check existence
 if options[:uuid]
-  referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
+  referee = referee_cache.in_mem_lookup options[:uuid]
   if options[:export]
     if !referee
       exit_with 4, "Referee not found"
@@ -131,21 +132,28 @@ if options[:uuid]
       info "Image uploaded (#{attachment_id})"
     end
 
-    referee = WPEvent::RefereePost.create options[:uuid],
-                                          options[:firstname],
-                                          options[:lastname],
-                                          options[:description],
-                                          attachment_id || nil
+    referee = WPEvent::CustomPostTypes::Referee.new(
+      uuid:      options[:uuid],
+      firstname: options[:firstname],
+      lastname:  options[:lastname],
+      content:   options[:description],
+      featured_image_id: attachment_id
+    )
 
-    info "referee created (#{referee})"
-    post_id = referee
+    Compostr::Syncer.new(nil).merge_push referee, nil
+
+    info "referee created ({referee_post_id}: #{referee})"
+    post_id = nil#referee_post_id
   else
     puts "found, wont update, maybe(nyi)"
     post_id = referee["post_id"]
   end
 else
-  referee = WPEvent::RefereePost.by_post_id options[:id]
+  referee = referee_cache.by_post_id options[:id]
   if options[:export]
+    if !referee
+      exit_with 4, "Referee not found"
+    end
     STDOUT.puts JSON.pretty_generate(referee)
     exit 0
   else

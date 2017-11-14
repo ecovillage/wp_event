@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rubypress"
   spec.add_dependency "mime-types"
   spec.add_dependency "rest-client"
+  spec.add_dependency "compostr"
 
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "bundler", "~> 1.11"

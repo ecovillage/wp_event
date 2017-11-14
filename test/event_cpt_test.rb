@@ -17,6 +17,7 @@ class EventCPTTest < Minitest::Test
     assert_equal "Bar", event.title
     assert_equal "Bar open till 22h!", event.description
     assert_equal "Bar open till 22h!", event.content
+    assert_equal "8fac", event.uuid
   end
 
   def test_add_referee
@@ -45,4 +46,15 @@ class EventCPTTest < Minitest::Test
     content.delete(:post_data)
     assert_equal asserted_content, content
   end
+
+  def test_content_js_strip
+    from_json = {
+                 :uuid        => "8fac",
+                 :name        => "Bar",
+                 :description => "Open till 22h!<script type='lmno'>abc</script>",
+                 }
+    event = WPEvent::CustomPostTypes::Event.new **from_json
+    assert_equal "Open till 22h!", event.content
+  end
+
 end

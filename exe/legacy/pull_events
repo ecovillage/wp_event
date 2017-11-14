@@ -31,7 +31,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-t", "--to DATE", DateTime, "Events ending date (YYYY-MM-DD HH:MM)") do |t|
     options[:to] = t
   end
-  opts.on("-u", "--uuid UUID", "Events UUID") do |u|
+  opts.on("-u", "--uuid UUID1,UUID2", "Events UUID", Array) do |u|
     options[:uuid] = u
   end
   opts.on("-i", "--image-source=URL", "Where to get images from (think about trailing slash!)") do |i|
@@ -71,12 +71,8 @@ option_parser.parse!
 # TODO this creates file before its used. frustration on errors (because then empty file is created)
 outstream = exit_or_get_out_stream ARGV, options
 
-if !outstream.is_a?(File)
-  WPEvent.logger = Logger.new(STDERR)
-end
-
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
-
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose],
+  stderr: !outstream.is_a?(File)
 
 if options[:from] && options[:to] && options[:uuid]
   exit_with 2, "Cannot specify --from, --to AND --uuid, aborting."
@@ -96,27 +92,34 @@ image_download = WPEvent::ImageDownload.new options[:image_store], options[:imag
 image_download.prepare!
 
 if options[:uuid]
-  # uuid given
-  event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb options[:uuid]
-  if event.nil?
-    info "event with uuid #{options[:uuid]} not found"
-  else
-    info "event with uuid #{options[:uuid]} found"
-
-    if !event.image_url.to_s.strip.empty? && image_download.ready?
-      image_download.download! event.image_url
-    end
-
-    debug "Original document: #{event.document}"
-    if options[:pretty_print]
-      outstream << JSON.pretty_generate([event].to_json)
+  # uuid(s) given
+  events = []
+  options[:uuid].each do |uuid|
+    event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb uuid
+    if event.nil?
+      info "event with uuid #{uuid} not found"
     else
-      outstream << [event].to_json
+      info "event with uuid #{uuid} found"
+
+      if !event.image_url.to_s.strip.empty? && image_download.ready?
+        image_download.download! event.image_url
+      end
+
+      debug "Original document: #{event.document}"
+      events << event
     end
-    debug "Output: #{[event].to_json}"
-    if outstream.is_a? File
-      info "Events found and written to #{outstream.path}"
-    end
+  end
+
+  # catch pipefail (e.g. when | head) http://www.jstorimer.com/blogs/workingwithcode/7766125-writing-ruby-scripts-that-respect-pipelines
+  # The exit(74) tells the program to exit with a non-successful exit code of 74. sysexits(3) s
+  if options[:pretty_print]
+    outstream << JSON.pretty_generate(events)
+  else
+    outstream << events.to_json
+  end
+  debug "Output: #{events.to_json}"
+  if outstream.is_a? File
+    info "Events found and written to #{outstream.path}"
   end
 elsif options[:from] && options[:to]
   # Range given

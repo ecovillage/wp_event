@@ -56,11 +56,8 @@ option_parser.parse!
 
 outstream = exit_or_get_out_stream ARGV, options
 
-if !outstream.is_a?(File)
-  WPEvent.logger = Logger.new(STDERR)
-end
-
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose],
+  stderr: !outstream.is_a?(File)
 
 image_download = WPEvent::ImageDownload.new options[:image_store],
   options[:image_source]

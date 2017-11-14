@@ -2,27 +2,7 @@ require 'logger'
 
 module WPEvent
   module CLI
-    # Module to extend to get easy access to standard log functions.
-    # These are debug, info, warn, error and fatal.
-    # All log functions use the WPEvent.logger (which can be customized).
-    # A typical client will just `extend WPEvent::Logging` .
     module Logging
-      def debug msg
-        WPEvent.logger.debug msg
-      end
-      def info msg
-        WPEvent.logger.info msg
-      end
-      def warn msg
-        WPEvent.logger.warn msg
-      end
-      def error msg
-        WPEvent.logger.error msg
-      end
-      def fatal msg
-        WPEvent.logger.fatal msg
-      end
-
       # Cheap little Logger Formatter that picks
       # colors for severity classes if STDOUT is a tty
       # (regardless of whether the logger logs to STDOUT or not).
@@ -49,10 +29,14 @@ module WPEvent
         IN_WHITE        = "\e[37m%s\e[0;0m"
 
         SEVERITY_COLOR_MAP = { "DEBUG" => IN_YELLOW,
-                               "INFO"  => IN_GREEN }
+                               "INFO"  => IN_GREEN,
+                               "ERROR" => IN_RED }
 
         def initialize
-          @colorize = STDOUT.tty?
+          super
+          # Alternatively poor-mans solution STDOUT.tty?
+          # We need to hack our way into logger (logdev is not accessible from outside)
+          @colorize = Compostr::logger.instance_eval("@logdev&.dev&.tty?")
         end
 
         def call(severity, time, progname, msg)

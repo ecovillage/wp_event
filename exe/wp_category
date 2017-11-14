@@ -69,9 +69,9 @@ if (options[:id] || options[:uuid]) && options[:list]
 end
 
 begin
-  WPEvent.load_conf
+  Compostr.load_conf
 rescue Errno::ENOENT
-  STDERR.puts "Config file (wp_event.conf) not found."
+  STDERR.puts "Config file (compostr.conf) not found."
   exit 3
 end
 
@@ -88,17 +88,22 @@ def upload_image file_path, post_id=nil
   id = upload["attachment_id"]
 end
 
+category_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Category)
+
 # Actions
 if options[:list]
-  puts WPEvent::CategoryPost.name_pid_map.to_yaml
+  puts category_cache.name_id_map.to_yaml
   exit 0
 end
 
 # Default: Create/Update
 # Check existence
 if options[:uuid]
-  category = WPEvent::CategoryPost.uuid_in_wordpress? options[:uuid]
+  category = category_cache.in_mem_lookup options[:uuid]
   if options[:export]
+    if !category
+      exit_with 4, "Category not found"
+    end
     STDOUT.puts JSON.pretty_generate(category)
     exit 0
   end
@@ -110,18 +115,21 @@ if options[:uuid]
 
   # Export, Update or Create?
   if !category
-    category = WPEvent::CategoryPost.create options[:uuid],
-                                        options[:name],
-                                        options[:description],
-                                        attachment_id
-    puts "created"
+    category = WPEvent::CustomPostTypes::Category.new uuid: options[:uuid],
+                                                      name: options[:name],
+                                                      description: options[:description]#,
+                                                      # attachment_id
+    Compostr::Syncer.new(nil).merge_push event, nil
     post_id = category
   else
     post_id = category["post_id"]
   end
 else
-  category = WPEvent::CategoryPost.by_post_id options[:id]
+  category = category_cache.by_post_id options[:id]
   if options[:export]
+    if !category
+      exit_with 4, "Category not found"
+    end
     STDOUT.puts JSON.pretty_generate(category)
     exit 0
   else
