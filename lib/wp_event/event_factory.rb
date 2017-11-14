@@ -39,8 +39,12 @@ module WPEvent
       referee_ids = ref_data.map{|k,v| v[:id]}.compact
       missing_referee_uuids = ref_data.values.select{|v| v[:id].nil?}.map{|v| v[:uuid]}
 
-      if @raise_on_missing_referee && !missing_referee_uuids.empty?
-        raise MissingRefereeError.new "Required referee missing", missing_referee_uuids
+      if !missing_referee_uuids.empty?
+        if @raise_on_missing_referee
+          raise MissingRefereeError.new "Required referee missing", missing_referee_uuids
+        else
+          warn "Required referee missing #{missing_referee_uuids}"
+        end
       end
 
       event_json[:referee_id] = referee_ids
