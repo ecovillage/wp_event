@@ -3,6 +3,8 @@ require 'json'
 module WPEvent
   module CouchImport
     class CouchEvent
+      extend Compostr::Logging
+
       attr_accessor :title, :description,
         :from, :to, :category_names, :uuid,
         :arrival, :departure, :current_infos, :costs_participation,
@@ -78,6 +80,7 @@ module WPEvent
           return nil if !response.dig("g_value", "publish_web")
           from_couch_doc response
         rescue StandardError => e
+          error "Error caught: #{e.inspect} at #{caller[0]}"
           nil
         end
       end
