@@ -9,7 +9,5 @@ module WPEvent
       error msg
       exit exit_code
     end
-
-
   end
 end

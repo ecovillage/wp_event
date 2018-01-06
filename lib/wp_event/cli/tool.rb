@@ -62,7 +62,6 @@ module WPEvent
       # as file, if needed), or throws an InputArgumentError (might get
       # a different name in near future).
       def input_stream_or_exit
-
         if ARGV.length != 1 && STDIN.tty?
           # No input argument and STDIN is terminal.
           raise InputArgumentError.new("Please provide json input file path or pipe into me.")
