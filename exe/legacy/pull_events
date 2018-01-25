@@ -31,7 +31,7 @@ option_parser = OptionParser.new do |opts|
   opts.on("-t", "--to DATE", DateTime, "Events ending date (YYYY-MM-DD HH:MM)") do |t|
     options[:to] = t
   end
-  opts.on("-u", "--uuid UUID1,UUID2", "Events UUID", Array) do |u|
+  opts.on("-u", "--uuid UUID1,UUID2", "Events UUID(s)", Array) do |u|
     options[:uuid] = u
   end
   opts.on("-i", "--image-source=URL", "Where to get images from (think about trailing slash!)") do |i|
