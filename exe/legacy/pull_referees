@@ -19,7 +19,7 @@ option_parser = OptionParser.new do |opts|
   USAGE
 
   opts.separator "Filtering options"
-  opts.on("-u", "--uuid UUID1,UUID2", "Referee UUID(s)") do |u|
+  opts.on("-u", "--uuid UUID1,UUID2", "Referee UUID(s)", Array) do |u|
     options[:uuid] = u
   end
 
