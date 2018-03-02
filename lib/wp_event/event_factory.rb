@@ -28,8 +28,11 @@ module WPEvent
         event_json[(key.to_sym rescue key) || key] = event_json.delete(key)
       end
 
+      # Dealingn with legacy stuff, this is a workaround the old legacy stuff.
+      # Sometimes category-names are still a string-encoded array (and not an Array).
+      # Thus we run through a second JSON-parsing step here.
       category_names = event_json.delete :category_names
-      category_ids   = category_ids(category_names)
+      category_ids   = category_ids(JSON.parse category_names.to_s)
 
       event_json[:event_category_id] = category_ids
       event_json[:fromdate] = DateTime.parse(event_json[:fromdate]).to_time.to_i rescue ''
