@@ -32,6 +32,7 @@ module WPEvent
       # Sometimes category-names are still a string-encoded array (and not an Array).
       # Thus we run through a second JSON-parsing step here.
       category_names = event_json.delete :category_names
+      category_names = JSON.parse(category_names.to_s) if (category_names && !category_names.empty?)
       category_ids   = category_ids(JSON.parse category_names.to_s)
 
       event_json[:event_category_id] = category_ids
