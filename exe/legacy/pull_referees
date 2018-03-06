@@ -75,6 +75,7 @@ image_download.prepare!
 
 if options[:uuid]
   # uuid(s) given
+  referees = []
   options[:uuid].each do |uuid|
     referee = WPEvent::CouchImport::CouchReferee.pull_from_couchdb uuid
     if referee.nil?
@@ -87,12 +88,13 @@ if options[:uuid]
       end
       debug "Output: #{[referee].to_json}"
       debug "Original document: #{referee.document}"
-      if options[:pretty_print]
-        outstream << JSON.pretty_generate([referee])
-      else
-        outstream << [referee].to_json
-      end
+      referees << referee
     end
+  end
+  if options[:pretty_print]
+    outstream << JSON.pretty_generate(referees)
+  else
+    outstream << referees.to_json
   end
 else
   # default, pull all
