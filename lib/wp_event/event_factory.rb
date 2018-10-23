@@ -33,7 +33,7 @@ module WPEvent
       # Thus we run through a second JSON-parsing step here.
       category_names = event_json.delete :category_names
       category_names = JSON.parse(category_names.to_s) if (category_names && !category_names.empty?)
-      category_ids   = category_ids(JSON.parse category_names.to_s)
+      category_ids   = category_ids(category_names)
 
       event_json[:event_category_id] = category_ids
       event_json[:fromdate] = DateTime.parse(event_json[:fromdate]).to_time.to_i rescue ''
