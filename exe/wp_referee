@@ -8,6 +8,7 @@ require 'optparse/date' # this has to be documented in ruby! (TODO)
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
+extend WPEvent::CLI::Tool
 
 options = {}
 
@@ -63,7 +64,7 @@ end
 # Process options
 option_parser.parse!
 
-WPEvent.logger.level = options[:verbose] ? Logger::DEBUG : Logger::INFO
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
 
 if !options[:id] && !options[:uuid] && !options[:list]
   STDERR.puts "Please provide at least the referees (uu)id or specify the list action."
