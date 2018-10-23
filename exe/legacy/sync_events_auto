@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+
+require 'wp_event'
+
+require 'optparse'
+require 'json'
+
+extend WPEvent::CLI
+extend WPEvent::CLI::Tool
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+  opts.banner = <<~USAGE
+    Usage: #{$PROGRAM_NAME} [options] FILE
+
+    Sync a list of events with events registered in wordpress instance.
+
+    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}], arrival:, departure:, current_infos:, info_housing:, costs_participation:, costs_catering:, registration_needed:, cancel_conditions:, participants_please_bring:, participants_prerequisites:).
+    Alternatively, will read from STDIN.
+    Will exit with 0 on success
+
+  USAGE
+
+  opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
+    options[:image_store] = s
+  end
+
+  opts.separator "Common options"
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+  opts.on_tail("-h", "--help", "Show this message and exit") do
+    puts opts
+    exit
+  end
+  opts.on_tail("--version", "Show version and exit") do
+    puts WPEvent::VERSION
+    exit
+  end
+end
+
+# Process options
+option_parser.parse!
+
+WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
+
+debug "Starting event sync (#{WPEvent::VERSION})"
+
+begin
+  Compostr.load_conf
+rescue Errno::ENOENT
+  exit_with 3, "Config file (compostr.conf) not found."
+end
+
+begin
+  io = input_stream_or_exit
+  json = io.read
+  events = JSON.parse json
+rescue WPEvent::CLI::Tool::InputArgumentError => e
+  exit_with 7, "#{e.message}"
+rescue JSON::ParserError => e
+  debug $!
+  exit_with 5, "Input could not be parsed (valid json?)."
+end
+
+event_cache    = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Event)
+media_cache    = Compostr::MediaLibraryCache.new
+image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
+
+syncer = Compostr::Syncer.new image_uploader
+
+event_factory = WPEvent::EventFactory.new raise_on_missing_referee: true
+
+events.each_with_index do |event, idx|
+  uuid = event['uuid']
+  info "(#{idx + 1}/#{events.length}) dealing with event with uuid #{uuid}"
+
+  begin
+    # 'event' is the new data
+    wp_event_content = event_cache.in_mem_lookup uuid
+    debug "wp_event_content from cache is #{wp_event_content}"
+
+    event_from_json  = event_factory.from_json event # Now keys are symbols!
+    event_from_wp    = WPEvent::CustomPostTypes::Event.from_content_hash(wp_event_content)
+
+    attachment_id = image_uploader.process(event[:image_url])
+    event_from_json.featured_image_id = attachment_id
+
+    if options[:force]
+      syncer.merge_push event_from_json, event_from_wp
+    else
+      diffs = event_from_json.diff(event_from_wp)
+      if !diffs.empty?
+        syncer.merge_push event_from_json, event_from_wp
+      else
+        info "#{uuid} is unchanged."
+      end
+    end
+
+  rescue WPEvent::MissingCategoryError => e
+    exit_with 7, "A required category (in #{e.missing_categories}) does not exist, aborting."
+  rescue WPEvent::MissingRefereeError => e
+    exit_with 8, "A required referee (in uuids: #{e.missing_referees})"\
+                 " does not exist, aborting."
+  end
+end
+
+debug "Finished event sync (#{WPEvent::VERSION})"
+exit 0
