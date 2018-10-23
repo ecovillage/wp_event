@@ -89,6 +89,10 @@ media_cache    = Compostr::MediaLibraryCache.new
 image_uploader = Compostr::ImageUploader.new options[:image_store], media_cache
 
 syncer = Compostr::Syncer.new image_uploader
+referee_syncer = WPEvent::LegacyGlue::RefereeSync.new(
+  Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee),
+  media_cache,
+  image_uploader)
 
 event_factory = WPEvent::EventFactory.new raise_on_missing_referee: true
 
@@ -101,7 +105,21 @@ events.each_with_index do |event, idx|
     wp_event_content = event_cache.in_mem_lookup uuid
     debug "wp_event_content from cache is #{wp_event_content}"
 
-    event_from_json  = event_factory.from_json event # Now keys are symbols!
+    begin
+      event_from_json  = event_factory.from_json event # Now keys are symbols!
+    rescue WPEvent::MissingRefereeError => e
+      info "Also syncing missing referees"
+      e.missing_referees.each do |missing_referee_uuid|
+        info "Syncing missing referee #{missing_referee_uuid}"
+        referee = WPEvent::CouchImport::CouchReferee.pull_from_couchdb missing_referee_uuid
+        referee_syncer.sync([JSON.parse(referee.to_json)])
+        info "Missing referee #{missing_referee_uuid} synced"
+      end
+
+      event_factory.referee_cache.flush
+      event_from_json  = event_factory.from_json event # Now keys are symbols!
+    end
+
     event_from_wp    = WPEvent::CustomPostTypes::Event.from_content_hash(wp_event_content)
 
     attachment_id = image_uploader.process(event[:image_url])

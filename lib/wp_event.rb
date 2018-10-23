@@ -31,6 +31,8 @@ require "wp_event/couch_import/couch_importer"
 require "wp_event/couch_import/couch_referee"
 require "wp_event/couch_import/lambdas"
 
+require "wp_event/legacy_glue/referee_sync"
+
 require 'ostruct'
 require 'yaml'
 require 'rubypress'
