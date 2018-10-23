@@ -12,15 +12,17 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
-    Usage: #{$PROGRAM_NAME} [options] FILE
+    Usage: #{$PROGRAM_NAME} [options]
 
-    Sync a list of events with events registered in wordpress instance.
+    Sync a list of events with events registered in wordpress instance.  Pull these events from a (legacy) couchdb.
 
-    FILE is supposed to be a json array of hashes (uuid:, name:, description:, fromdate:, todate:, image_url:, category_names:, referee_qualifications: [{uuid:, qualification:}], arrival:, departure:, current_infos:, info_housing:, costs_participation:, costs_catering:, registration_needed:, cancel_conditions:, participants_please_bring:, participants_prerequisites:).
-    Alternatively, will read from STDIN.
     Will exit with 0 on success
 
   USAGE
+
+  opts.on("-u", "--uuid UUID1,UUID2", "Events UUID(s)", Array) do |u|
+    options[:uuids] = u
+  end
 
   opts.on("-s", "--image-store=PATH", "Path where to search images (to upload)") do |s|
     options[:image_store] = s
@@ -51,6 +53,10 @@ begin
   Compostr.load_conf
 rescue Errno::ENOENT
   exit_with 3, "Config file (compostr.conf) not found."
+end
+
+if !options[:uuids]
+  exit_with 2, "Need one or more UUIDs (specify --uuid UUID1,UUID2)!"
 end
 
 begin
