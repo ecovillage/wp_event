@@ -1,3 +1,5 @@
 host: "wp_event.mydomain"
 username: "admin"
 password: "buzzword"
+use_ssl:  true
+path:     "/blog/xmlrpc.php"
