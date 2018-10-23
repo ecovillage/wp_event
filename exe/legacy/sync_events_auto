@@ -12,7 +12,7 @@ options = {}
 
 option_parser = OptionParser.new do |opts|
   opts.banner = <<~USAGE
-    Usage: #{$PROGRAM_NAME} [options]
+    Usage: #{$PROGRAM_NAME} [options] --uuid UUID1,UUID2
 
     Sync a list of events with events registered in wordpress instance.  Pull these events from a (legacy) couchdb.
 
@@ -60,11 +60,25 @@ if !options[:uuids]
 end
 
 begin
-  io = input_stream_or_exit
-  json = io.read
-  events = JSON.parse json
-rescue WPEvent::CLI::Tool::InputArgumentError => e
-  exit_with 7, "#{e.message}"
+  events_json = options[:uuids].map do |uuid|
+    event = WPEvent::CouchImport::CouchEvent.pull_from_couchdb uuid
+    if event.nil?
+      info "event with uuid #{uuid} not found"
+    else
+      info "event with uuid #{uuid} found"
+
+      warn "Skipping image down and upload"
+      #if !event.image_url.to_s.strip.empty? && image_download.ready?
+      #  image_download.download! event.image_url
+      #end
+
+      debug "Original document: #{event.document}"
+      event
+    end
+  end
+
+  events = JSON.parse events_json.to_json # (array)
+  info events
 rescue JSON::ParserError => e
   debug $!
   exit_with 5, "Input could not be parsed (valid json?)."
