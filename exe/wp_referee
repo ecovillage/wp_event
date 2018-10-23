@@ -109,7 +109,6 @@ if options[:uuid]
   end
 
   if options[:delete]
-    referee = WPEvent::RefereePost.uuid_in_wordpress? options[:uuid]
     if !referee
       exit_with 3, "Referee not found"
     end
