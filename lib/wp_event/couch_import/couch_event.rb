@@ -5,7 +5,7 @@ module WPEvent
     class CouchEvent
       extend Compostr::Logging
 
-      attr_accessor :title, :description,
+      attr_accessor :title, :description, :excerpt,
         :from, :to, :category_names, :uuid,
         :arrival, :departure, :current_infos, :costs_participation,
         :costs_catering, :info_housing, :other_infos, :participants_prerequisites,
@@ -13,7 +13,7 @@ module WPEvent
         :document, :referee_and_qualifications,
         :image_url, :timestamp
 
-      def initialize uuid: nil, title: nil, description: nil, from: nil,
+      def initialize uuid: nil, title: nil, description: nil, excerpt: nil, from: nil,
         to: nil, category_names: nil, referee_and_qualifications: nil,
         arrival: nil, departure: nil, current_infos: nil,
         costs_participation: nil, costs_catering: nil, info_housing: nil, other_infos: nil,
@@ -22,6 +22,7 @@ module WPEvent
         @uuid        = uuid
         @title       = title
         @description = description
+        @excerpt     = excerpt
         @from        = from
         @to          = to
         @category_names = category_names
@@ -54,6 +55,7 @@ module WPEvent
         WPEvent::CouchImport::CouchEvent.new uuid: document["_id"],
           title: document.dig("g_value", "title"),
           description: document.dig("g_value", "description_long"),
+          excerpt: document.dig("g_value", "description_normal"),
           to:   Date.strptime(document.dig("g_value", "date_to"),   "%d.%m.%Y"),
           from: Date.strptime(document.dig("g_value", "date_from"), "%d.%m.%Y"),
           category_names: document.dig("g_value", "categories"),
@@ -129,6 +131,7 @@ module WPEvent
         { uuid:           @uuid,
           name:           @title,
           description:    @description,
+          excerpt:        @excerpt,
           fromdate:       @from,
           todate:         @to,
           category_names: @category_names,
