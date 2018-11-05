@@ -24,6 +24,7 @@ module WPEvent
       wp_custom_field_single 'participants_please_bring'
       wp_custom_field_single 'participants_prerequisites'
       wp_custom_field_single 'registration_needed'
+      wp_custom_field_single 'registration_link'
       wp_custom_field_single 'cancel_conditions'
 
 
