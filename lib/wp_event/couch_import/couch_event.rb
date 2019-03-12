@@ -9,7 +9,7 @@ module WPEvent
         :from, :to, :category_names, :uuid,
         :arrival, :departure, :current_infos, :costs_participation,
         :costs_catering, :info_housing, :other_infos, :participants_prerequisites,
-        :participants_please_bring, :registration_needed,
+        :participants_please_bring, :registration_needed, :registration_link,
         :document, :referee_and_qualifications,
         :image_url, :timestamp
 
@@ -18,7 +18,7 @@ module WPEvent
         arrival: nil, departure: nil, current_infos: nil,
         costs_participation: nil, costs_catering: nil, info_housing: nil, other_infos: nil,
         participants_prerequisites: nil, participants_please_bring: nil,
-        image_url: nil, registration_needed: true, cancel_conditions: nil, timestamp: DateTime.now, document: nil
+        image_url: nil, registration_needed: true, registration_link: nil, cancel_conditions: nil, timestamp: DateTime.now, document: nil
         @uuid        = uuid
         @title       = title
         @description = description
@@ -40,6 +40,7 @@ module WPEvent
         @participants_prerequisites = participants_prerequisites
         @participants_please_bring = participants_please_bring
         @registration_needed = registration_needed
+        @registration_link   = registration_link
         @cancel_conditions   = cancel_conditions
       end
 
@@ -66,6 +67,7 @@ module WPEvent
           info_housing: web_notice_array_val(document, "housing", "Unterkunft"),
           other_infos: other_web_notices(document),
           costs_participation: web_notice_array_val(document, "cost_seminar", "Seminarkosten"),
+          registration_link: document.dig("g_value", "registration_needed"),
           registration_needed: document.dig("g_value", "registration_needed"),
           participants_prerequisites: document.dig("g_value", "attendee_preconditions"),
           participants_please_bring: document.dig("g_value", "please_bring"),
@@ -146,6 +148,7 @@ module WPEvent
           other_infos:    @other_infos,
           participants_please_bring: @participants_please_bring,
           participants_prerequisites: @participants_prerequisites,
+          registration_link:   @registration_link,
           registration_needed: @registration_needed,
           cancel_conditions:   @cancel_conditions,
           timestamp:      @timestamp
