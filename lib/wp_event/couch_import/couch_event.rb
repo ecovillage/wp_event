@@ -67,7 +67,7 @@ module WPEvent
           info_housing: web_notice_array_val(document, "housing", "Unterkunft"),
           other_infos: other_web_notices(document),
           costs_participation: web_notice_array_val(document, "cost_seminar", "Seminarkosten"),
-          registration_link: document.dig("g_value", "registration_needed"),
+          registration_link: document.dig("g_value", "registration_link"),
           registration_needed: document.dig("g_value", "registration_needed"),
           participants_prerequisites: document.dig("g_value", "attendee_preconditions"),
           participants_please_bring: document.dig("g_value", "please_bring"),
