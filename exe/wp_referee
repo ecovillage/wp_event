@@ -5,6 +5,8 @@
 require 'wp_event'
 require 'json'
 require 'optparse/date' # this has to be documented in ruby! (TODO)
+require 'iconv'
+require 'asciify'
 
 extend WPEvent::CLI::Logging
 extend WPEvent::CLI
@@ -40,6 +42,9 @@ option_parser = OptionParser.new do |opts|
   opts.on("-l", "--list", "List referees") do |l|
     options[:list] = l
   end
+  opts.on("-e", "--extended-list", "List referees with uuid and featured image info") do |e|
+    options[:extended_list] = e
+  end
   opts.on("-r", "--delete", "Delete given referee") do |d|
     options[:delete] = d
   end
@@ -66,7 +71,7 @@ option_parser.parse!
 
 WPEvent::CLI::Tool.init_logger verbose: options[:verbose]
 
-if !options[:id] && !options[:uuid] && !options[:list]
+if !options[:id] && !options[:uuid] && !options[:list] && !options[:extended_list]
   STDERR.puts "Please provide at least the referees (uu)id or specify the list action."
   puts option_parser
   exit 1
@@ -94,6 +99,26 @@ referee_cache = Compostr::EntityCache.new(WPEvent::CustomPostTypes::Referee)
 if options[:list]
   # uuid, name
   puts referee_cache.name_id_map.to_yaml
+  exit 0
+end
+
+if options[:extended_list]
+  ascii_map = Asciify::Mapping.new(:default)
+  # uuid, id, image_link, firstname_lastname
+  referee_cache.uuid_id_map.each do |uuid,id|
+    ref_json = referee_cache.full_data.find{|p| p['post_id'] == id}
+
+    image_link = ref_json["post_thumbnail"].is_a?(Hash) ? ref_json.dig("post_thumbnail", "link") : ''
+
+    firstname = ref_json["custom_fields"].find{|cf| cf["key"] == 'firstname'}['value']
+    lastname = ref_json["custom_fields"].find{|cf| cf["key"] == 'lastname'}['value']
+
+    ext = Pathname.new(image_link).extname
+    filename = "siebenlinden_referent_in-#{firstname}-#{lastname}-#{uuid}#{ext}".asciify(ascii_map)
+
+    puts "#{uuid},#{id},#{image_link},#{filename}"
+  end
+
   exit 0
 end
 
